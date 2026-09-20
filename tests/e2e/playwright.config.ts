@@ -16,7 +16,7 @@ export default defineConfig({
     baseURL: process.env.BASE_URL ?? "http://127.0.0.1:" + e2ePort,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
-    channel: process.env.PLAYWRIGHT_CHANNEL ?? "chrome",
+    channel: process.env.PLAYWRIGHT_CHANNEL || undefined,
     ...devices["Desktop Chrome"]
   },
   webServer: {
