@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
-import re
 from typing import Any, Mapping
 
 import yaml
-
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "configs"
 
@@ -35,8 +34,7 @@ def _positive(value: Any, field: str, *, integer: bool = False) -> int | float:
 
 def _crs_params(crs: str) -> dict[str, float]:
     return {
-        key: float(value)
-        for key, value in re.findall(r"\+(lat_0|lon_0|lat_1|lat_2)=([^ ]+)", crs)
+        key: float(value) for key, value in re.findall(r"\+(lat_0|lon_0|lat_1|lat_2)=([^ ]+)", crs)
     }
 
 
@@ -121,8 +119,14 @@ class DomainConfig:
         dx_deg = float(raw["dx_deg"]) if "dx_deg" in raw else None
         if (dx_m is None) == (dx_deg is None):
             raise ValueError(f"{name} must define exactly one of dx_m or dx_deg")
-        upper_left_xy_m = tuple(float(v) for v in raw["upper_left_xy_m"]) if "upper_left_xy_m" in raw else None
-        upper_left_lonlat = tuple(float(v) for v in raw["upper_left_lonlat"]) if "upper_left_lonlat" in raw else None
+        upper_left_xy_m = (
+            tuple(float(v) for v in raw["upper_left_xy_m"]) if "upper_left_xy_m" in raw else None
+        )
+        upper_left_lonlat = (
+            tuple(float(v) for v in raw["upper_left_lonlat"])
+            if "upper_left_lonlat" in raw
+            else None
+        )
         if (upper_left_xy_m is None) == (upper_left_lonlat is None):
             raise ValueError(f"{name} must define exactly one upper-left coordinate")
         if len(upper_left_xy_m or upper_left_lonlat or ()) != 2:
@@ -180,7 +184,9 @@ def load_domains(path: str | Path | None = None) -> dict[str, DomainConfig]:
     entries = raw.get("domains")
     if not isinstance(entries, Mapping) or not entries:
         raise ValueError("domains.yaml must contain a non-empty domains mapping")
-    return {str(name): DomainConfig.from_mapping(str(name), value) for name, value in entries.items()}
+    return {
+        str(name): DomainConfig.from_mapping(str(name), value) for name, value in entries.items()
+    }
 
 
 def load_domain(name: str, path: str | Path | None = None) -> DomainConfig:
@@ -212,7 +218,9 @@ def load_channels(path: str | Path | None = None) -> dict[str, ChannelConfig]:
 
 def load_channel(name: str, path: str | Path | None = None) -> ChannelConfig:
     channels = load_channels(path)
-    qualified = name if "/" in name else next((key for key in channels if key.endswith(f"/{name}")), None)
+    qualified = (
+        name if "/" in name else next((key for key in channels if key.endswith(f"/{name}")), None)
+    )
     if qualified is None or qualified not in channels:
         raise KeyError(f"unknown channel: {name}")
     return channels[qualified]

@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 
 import numpy as np
 import pytest
-
 from metron.features.builder import build_feature_bundle
 from metron.features.contracts import FeatureContract, FeatureContractError
 from metron.grids.config import load_domain

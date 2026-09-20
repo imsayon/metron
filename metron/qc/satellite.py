@@ -13,7 +13,6 @@ import numpy as np
 
 from .boundary import bounded_qc
 
-
 SATELLITE_RANGES: dict[str, tuple[float, float]] = {
     "ir1": (150.0, 400.0),
     "ir2": (150.0, 400.0),
@@ -41,7 +40,7 @@ def qc_satellite(
     manifest_ids: tuple[str, ...] = (),
     valid_mask: np.ndarray | None = None,
     estimated_time: bool = False,
-) :
+):
     """Validate a satellite channel and preserve calibrated/missing flags."""
 
     if channel not in SATELLITE_RANGES:

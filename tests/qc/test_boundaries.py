@@ -1,12 +1,10 @@
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
-
 from metron.qc.lightning import qc_lightning, validate_lightning_rows
 from metron.qc.nwp import qc_nwp
 from metron.qc.radar import qc_radar
 from metron.qc.satellite import qc_satellite
-
 
 UTC = timezone.utc
 OBS = datetime(2026, 9, 21, 10, tzinfo=UTC)
@@ -52,7 +50,9 @@ def test_lightning_access_gate_is_explicit_and_rows_have_a_schema():
         source_access_verified=False,
     )
     assert result.missing_reason == "ltg_unavailable"
-    rows = validate_lightning_rows([{"time_utc": OBS.isoformat(), "lat": 22.0, "lon": 88.0, "type": "CG"}])
+    rows = validate_lightning_rows(
+        [{"time_utc": OBS.isoformat(), "lat": 22.0, "lon": 88.0, "type": "CG"}]
+    )
     assert len(rows) == 1
 
 

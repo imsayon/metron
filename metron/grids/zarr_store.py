@@ -7,12 +7,12 @@ standard Zarr client and add a compressor at the storage boundary.
 
 from __future__ import annotations
 
-from contextlib import contextmanager
 import json
-from pathlib import Path
 import os
 import re
 import tempfile
+from contextlib import contextmanager
+from pathlib import Path
 from typing import Any, Iterator, Mapping, Sequence
 
 import numpy as np
@@ -27,7 +27,14 @@ except ImportError:  # pragma: no cover - Linux is the supported runtime.
 
 GROUPS = ("sat", "radar", "ltg", "nwp", "static", "prov")
 _SAFE_NAME = re.compile(r"^[A-Za-z0-9_-]+$")
-_IMMUTABLE_ATTRS = ("domain", "domain_version", "crs_wkt", "geotransform", "cycle_s", "channel_version")
+_IMMUTABLE_ATTRS = (
+    "domain",
+    "domain_version",
+    "crs_wkt",
+    "geotransform",
+    "cycle_s",
+    "channel_version",
+)
 
 
 class MetadataError(ValueError):
@@ -74,8 +81,12 @@ def _metadata_lock(path: Path) -> Iterator[None]:
 
 def _atomic_json(path: Path, value: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    payload = json.dumps(_json_safe(value), sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
-    with tempfile.NamedTemporaryFile("wb", dir=path.parent, prefix=f".{path.name}.", delete=False) as handle:
+    payload = json.dumps(
+        _json_safe(value), sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode("utf-8")
+    with tempfile.NamedTemporaryFile(
+        "wb", dir=path.parent, prefix=f".{path.name}.", delete=False
+    ) as handle:
         temp = Path(handle.name)
         handle.write(payload)
         handle.flush()
@@ -135,7 +146,10 @@ class ZarrGridStore:
         missing = set(_IMMUTABLE_ATTRS) - metadata.keys()
         if missing:
             raise MetadataError(f"missing required metadata: {sorted(missing)}")
-        if metadata["domain"] != self.domain.name or metadata["domain_version"] != self.domain.version:
+        if (
+            metadata["domain"] != self.domain.name
+            or metadata["domain_version"] != self.domain.version
+        ):
             raise MetadataError("metadata domain does not match store domain")
         transform = metadata["geotransform"]
         if not isinstance(transform, Sequence) or len(transform) != 6:
@@ -190,7 +204,9 @@ class ZarrGridStore:
                     "resampling": channel.resampling,
                 },
             )
-        self.ensure_array("prov", "source_bins", shape=(length,), dtype="<U1024", chunks=(1,), fill_value="")
+        self.ensure_array(
+            "prov", "source_bins", shape=(length,), dtype="<U1024", chunks=(1,), fill_value=""
+        )
 
     def ensure_array(
         self,
@@ -229,12 +245,18 @@ class ZarrGridStore:
                 current = json.loads(metadata_path.read_text(encoding="utf-8"))
                 for field in ("shape", "chunks", "dtype", "fill_value"):
                     if current.get(field) != metadata[field]:
-                        raise MetadataError(f"immutable array metadata field changed: {group}/{name}/{field}")
+                        raise MetadataError(
+                            f"immutable array metadata field changed: {group}/{name}/{field}"
+                        )
             else:
                 _atomic_json(metadata_path, metadata)
             if attrs:
                 attrs_path = array_dir / ".zattrs"
-                current_attrs = json.loads(attrs_path.read_text(encoding="utf-8")) if attrs_path.exists() else {}
+                current_attrs = (
+                    json.loads(attrs_path.read_text(encoding="utf-8"))
+                    if attrs_path.exists()
+                    else {}
+                )
                 _atomic_json(attrs_path, {**current_attrs, **attrs})
             self.consolidate_metadata(_locked=True)
         return array_dir
@@ -259,7 +281,9 @@ class ZarrGridStore:
             for y_chunk, y0 in enumerate(range(0, shape[1], chunks[1])):
                 for x_chunk, x0 in enumerate(range(0, shape[2], chunks[2])):
                     block = np.full((chunks[1], chunks[2]), fill, dtype=array.dtype)
-                    source = array[y0 : min(y0 + chunks[1], shape[1]), x0 : min(x0 + chunks[2], shape[2])]
+                    source = array[
+                        y0 : min(y0 + chunks[1], shape[1]), x0 : min(x0 + chunks[2], shape[2])
+                    ]
                     block[: source.shape[0], : source.shape[1]] = source
                     path = array_dir / f"{time_index}.{y_chunk}.{x_chunk}"
                     self._atomic_bytes(path, block.tobytes(order="C"))
@@ -267,7 +291,9 @@ class ZarrGridStore:
 
     @staticmethod
     def _atomic_bytes(path: Path, payload: bytes) -> None:
-        with tempfile.NamedTemporaryFile("wb", dir=path.parent, prefix=f".{path.name}.", delete=False) as handle:
+        with tempfile.NamedTemporaryFile(
+            "wb", dir=path.parent, prefix=f".{path.name}.", delete=False
+        ) as handle:
             temp = Path(handle.name)
             handle.write(payload)
             handle.flush()
@@ -285,7 +311,9 @@ class ZarrGridStore:
             for path in self.path.rglob(".zarray"):
                 relative = path.relative_to(self.path).as_posix()
                 metadata[relative] = json.loads(path.read_text(encoding="utf-8"))
-            _atomic_json(self.path / ".zmetadata", {"zarr_consolidated_format": 1, "metadata": metadata})
+            _atomic_json(
+                self.path / ".zmetadata", {"zarr_consolidated_format": 1, "metadata": metadata}
+            )
 
         if _locked:
             write()

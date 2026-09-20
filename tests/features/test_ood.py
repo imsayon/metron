@@ -1,5 +1,4 @@
 import numpy as np
-
 from metron.features.ood import OODScorer, mahalanobis_distance
 
 

@@ -2,7 +2,6 @@ import json
 
 import numpy as np
 import pytest
-
 from metron.grids.config import load_channels, load_domain
 from metron.grids.zarr_store import MetadataError, ZarrGridStore
 
@@ -23,9 +22,13 @@ def test_zarr_metadata_is_atomic_and_domain_locked(tmp_path):
 def test_zarr_time_slice_writes_uncompressed_v2_chunks(tmp_path):
     store = ZarrGridStore(tmp_path / "grid.zarr", load_domain("pilot_e"))
     store.create(channel_version=1)
-    store.ensure_array("radar", "zmax", shape=(2, 3, 4), dtype="<f4", chunks=(1, 2, 2), fill_value=-32.0)
+    store.ensure_array(
+        "radar", "zmax", shape=(2, 3, 4), dtype="<f4", chunks=(1, 2, 2), fill_value=-32.0
+    )
     with pytest.raises(MetadataError, match="immutable array metadata"):
-        store.ensure_array("radar", "zmax", shape=(3, 3, 4), dtype="<f4", chunks=(1, 2, 2), fill_value=-32.0)
+        store.ensure_array(
+            "radar", "zmax", shape=(3, 3, 4), dtype="<f4", chunks=(1, 2, 2), fill_value=-32.0
+        )
     store.write_slice("radar", "zmax", 0, np.arange(12, dtype=np.float32).reshape(3, 4))
     chunk = tmp_path / "grid.zarr" / "radar" / "zmax" / "0.1.1"
     assert chunk.exists()

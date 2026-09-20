@@ -54,7 +54,11 @@ class OODScorer:
         mean = np.asarray(self.reference_mean, dtype=np.float64).reshape(-1)
         object.__setattr__(self, "reference_mean", mean)
         if self.reference_covariance is not None:
-            object.__setattr__(self, "reference_covariance", np.asarray(self.reference_covariance, dtype=np.float64))
+            object.__setattr__(
+                self,
+                "reference_covariance",
+                np.asarray(self.reference_covariance, dtype=np.float64),
+            )
         if self.threshold < 0:
             raise ValueError("OOD threshold must be non-negative")
 
@@ -62,7 +66,9 @@ class OODScorer:
         array = np.asarray(features, dtype=np.float64)
         vector = array if array.ndim == 1 else array.reshape(array.shape[0], -1).mean(axis=1)
         value = mahalanobis_distance(vector, self.reference_mean, self.reference_covariance)
-        return OODResult(score=value, threshold=float(self.threshold), is_ood=value > self.threshold)
+        return OODResult(
+            score=value, threshold=float(self.threshold), is_ood=value > self.threshold
+        )
 
 
 def score_features(

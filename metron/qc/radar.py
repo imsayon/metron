@@ -8,7 +8,6 @@ import numpy as np
 
 from .boundary import bounded_qc
 
-
 RADAR_RANGES: dict[str, tuple[float, float]] = {
     "zmax": (-32.0, 80.0),
     "z_cappi1": (-32.0, 80.0),
@@ -61,7 +60,9 @@ def qc_radar(
             valid_mask = np.zeros_like(np.asarray(values), dtype=bool)
     if blocked_mask is not None:
         blocked = np.asarray(blocked_mask, dtype=bool)
-        valid_mask = ~blocked if valid_mask is None else np.asarray(valid_mask, dtype=bool) & ~blocked
+        valid_mask = (
+            ~blocked if valid_mask is None else np.asarray(valid_mask, dtype=bool) & ~blocked
+        )
         flags.add("blocked_pixels") if blocked.any() else None
     return bounded_qc(
         values,

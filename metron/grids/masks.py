@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import Mapping, Sequence
 
 import numpy as np
-
 from metron.qc.types import QCResult
 
 
@@ -19,7 +18,9 @@ class MaskBundle:
     manifest_ids: tuple[str, ...]
 
 
-def propagate_masks(results: Mapping[str, QCResult], *, shape: tuple[int, int] | None = None) -> MaskBundle:
+def propagate_masks(
+    results: Mapping[str, QCResult], *, shape: tuple[int, int] | None = None
+) -> MaskBundle:
     valid: dict[str, np.ndarray] = {}
     ages: dict[str, np.ndarray] = {}
     missing: dict[str, bool] = {}

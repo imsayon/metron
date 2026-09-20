@@ -69,7 +69,9 @@ def lcc_forward(
     return x, y
 
 
-def project_latlon(domain: "DomainConfig", lat_deg: np.ndarray | float, lon_deg: np.ndarray | float):
+def project_latlon(
+    domain: "DomainConfig", lat_deg: np.ndarray | float, lon_deg: np.ndarray | float
+):
     if domain.projection == "equirectangular":
         return np.asarray(lon_deg, dtype=float), np.asarray(lat_deg, dtype=float)
     return lcc_forward(lat_deg, lon_deg, **domain.projection_parameters)

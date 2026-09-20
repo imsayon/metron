@@ -1,5 +1,4 @@
 import numpy as np
-
 from metron.grids.regrid import regrid_extreme
 
 

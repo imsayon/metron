@@ -8,7 +8,6 @@ import numpy as np
 
 from .boundary import bounded_qc
 
-
 NWP_RANGES: dict[str, tuple[float, float]] = {
     "cape": (0.0, 20_000.0),
     "cin": (-20_000.0, 2_000.0),

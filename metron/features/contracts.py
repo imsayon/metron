@@ -27,11 +27,16 @@ class FeatureContract:
         names = tuple(self.names)
         object.__setattr__(self, "names", names)
         for field_name in ("means", "stds", "mins", "maxs"):
-            object.__setattr__(self, field_name, tuple(float(value) for value in getattr(self, field_name)))
+            object.__setattr__(
+                self, field_name, tuple(float(value) for value in getattr(self, field_name))
+            )
         if not names or len(set(names)) != len(names):
             raise FeatureContractError("feature names must be non-empty and unique")
         length = len(names)
-        if any(len(getattr(self, field_name)) != length for field_name in ("means", "stds", "mins", "maxs")):
+        if any(
+            len(getattr(self, field_name)) != length
+            for field_name in ("means", "stds", "mins", "maxs")
+        ):
             raise FeatureContractError("feature statistics must match names")
         if self.fill_policy != "zero_with_mask":
             raise FeatureContractError(f"unsupported fill policy: {self.fill_policy}")
@@ -39,7 +44,7 @@ class FeatureContract:
             raise FeatureContractError("contract versions must be positive")
         if any(std <= 0 or not np.isfinite(std) for std in self.stds):
             raise FeatureContractError("feature standard deviations must be finite and positive")
-        if any(low > high for low, high in zip(self.mins, self.maxs)):
+        if any(low > high for low, high in zip(self.mins, self.maxs, strict=True)):
             raise FeatureContractError("feature minimum cannot exceed maximum")
 
     def validate(
@@ -79,13 +84,15 @@ class FeatureContract:
     ) -> np.ndarray:
         """Stack features in contract order and replace missing values by zero."""
 
-        self.validate(tuple(features), domain_version=domain_version, channel_version=channel_version)
+        self.validate(
+            tuple(features), domain_version=domain_version, channel_version=channel_version
+        )
         arrays = [np.asarray(features[name], dtype=np.float32) for name in self.names]
         shape = arrays[0].shape
         if any(array.shape != shape for array in arrays):
             raise FeatureContractError("feature arrays must all have the same shape")
         normalized: list[np.ndarray] = []
-        for index, (name, array) in enumerate(zip(self.names, arrays)):
+        for index, (name, array) in enumerate(zip(self.names, arrays, strict=True)):
             valid = np.isfinite(array) & (array >= self.mins[index]) & (array <= self.maxs[index])
             if masks is not None:
                 if name not in masks or np.asarray(masks[name]).shape != shape:

@@ -6,7 +6,6 @@ from typing import Literal
 
 import numpy as np
 
-
 Reducer = Literal["min", "max", "max_abs", "mean", "sum", "nearest", "bilinear"]
 
 
@@ -49,7 +48,9 @@ def regrid_extreme(
     """
 
     reducer: Reducer = {"minimum": "min", "maximum": "max", "max_abs": "max_abs"}[kind]
-    return _resample(values, target_shape, reducer=reducer, valid_mask=valid_mask, fill_value=fill_value)
+    return _resample(
+        values, target_shape, reducer=reducer, valid_mask=valid_mask, fill_value=fill_value
+    )
 
 
 def _resample(
@@ -88,13 +89,17 @@ def _bilinear(values: np.ndarray, target_shape: tuple[int, int], fill_value: flo
     if np.isnan(source).any():
         # NaN-aware interpolation is a separate policy; preserve the mask by
         # using nearest-neighbour for a sparse field rather than inventing it.
-        return _resample(source, target_shape, reducer="nearest", valid_mask=None, fill_value=fill_value)
+        return _resample(
+            source, target_shape, reducer="nearest", valid_mask=None, fill_value=fill_value
+        )
     src_y = np.arange(source.shape[0], dtype=float)
     src_x = np.arange(source.shape[1], dtype=float)
     dst_y = np.linspace(0.0, source.shape[0] - 1, target_shape[0])
     dst_x = np.linspace(0.0, source.shape[1] - 1, target_shape[1])
     along_x = np.vstack([np.interp(dst_x, src_x, row) for row in source])
-    return np.vstack([np.interp(dst_y, src_y, along_x[:, col]) for col in range(target_shape[1])]).T.astype(np.float32)
+    return np.vstack(
+        [np.interp(dst_y, src_y, along_x[:, col]) for col in range(target_shape[1])]
+    ).T.astype(np.float32)
 
 
 def regrid_channel(
@@ -109,17 +114,29 @@ def regrid_channel(
 
     policy = resampling.lower().replace("_", "-")
     if policy in {"nearest-min", "min", "minimum"}:
-        return regrid_extreme(values, target_shape, kind="minimum", valid_mask=valid_mask, fill_value=fill_value)
+        return regrid_extreme(
+            values, target_shape, kind="minimum", valid_mask=valid_mask, fill_value=fill_value
+        )
     if policy in {"max", "maximum"}:
-        return regrid_extreme(values, target_shape, kind="maximum", valid_mask=valid_mask, fill_value=fill_value)
+        return regrid_extreme(
+            values, target_shape, kind="maximum", valid_mask=valid_mask, fill_value=fill_value
+        )
     if policy in {"signed-max-abs", "max-abs"}:
-        return regrid_extreme(values, target_shape, kind="max_abs", valid_mask=valid_mask, fill_value=fill_value)
+        return regrid_extreme(
+            values, target_shape, kind="max_abs", valid_mask=valid_mask, fill_value=fill_value
+        )
     if policy in {"nearest"}:
-        return _resample(values, target_shape, reducer="nearest", valid_mask=valid_mask, fill_value=fill_value)
+        return _resample(
+            values, target_shape, reducer="nearest", valid_mask=valid_mask, fill_value=fill_value
+        )
     if policy in {"sum"}:
-        return _resample(values, target_shape, reducer="sum", valid_mask=valid_mask, fill_value=fill_value)
+        return _resample(
+            values, target_shape, reducer="sum", valid_mask=valid_mask, fill_value=fill_value
+        )
     if policy in {"area-mean", "mean", "bilinear"}:
         if policy == "bilinear" and valid_mask is None:
             return _bilinear(values, target_shape, fill_value)
-        return _resample(values, target_shape, reducer="mean", valid_mask=valid_mask, fill_value=fill_value)
+        return _resample(
+            values, target_shape, reducer="mean", valid_mask=valid_mask, fill_value=fill_value
+        )
     raise ValueError(f"unsupported resampling policy: {resampling}")

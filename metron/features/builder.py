@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Mapping, Sequence
+from typing import Mapping
 
 import numpy as np
-
 from metron.grids.masks import propagate_masks
 from metron.qc.types import Provenance, QCResult, missing_qc_result
 
@@ -53,7 +51,9 @@ class FeatureBundle:
         )
 
 
-def _group_valid(results: Mapping[str, QCResult], group: str, max_age: float, min_coverage: float) -> bool:
+def _group_valid(
+    results: Mapping[str, QCResult], group: str, max_age: float, min_coverage: float
+) -> bool:
     group_results = [result for name, result in results.items() if _group(name, result) == group]
     if not group_results:
         return False
@@ -102,7 +102,9 @@ def build_feature_bundle(
         missing_names = set(contract.names) - set(live_names)
         extra_names = set(live_names) - set(contract.names)
         if extra_names:
-            contract.validate(live_names, domain_version=domain_version, channel_version=channel_version)
+            contract.validate(
+                live_names, domain_version=domain_version, channel_version=channel_version
+            )
         for name in missing_names:
             group = _group(name)
             results = dict(results)
