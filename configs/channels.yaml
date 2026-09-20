@@ -1,0 +1,420 @@
+channel_version: 1
+channels:
+  sat:
+    ir1:
+      units: K
+      dtype: int16
+      scale: 100
+      source: INSAT TIR1
+      resampling: nearest-min
+      fill_value: -32768
+    ir2:
+      units: K
+      dtype: int16
+      scale: 100
+      source: INSAT TIR2
+      resampling: nearest-min
+      fill_value: -32768
+    wv:
+      units: K
+      dtype: int16
+      scale: 100
+      source: INSAT WV
+      resampling: nearest-min
+      fill_value: -32768
+    mir:
+      units: K
+      dtype: int16
+      scale: 100
+      source: INSAT MIR
+      resampling: nearest-min
+      fill_value: -32768
+    vis:
+      units: refl
+      dtype: int16
+      scale: 10000
+      source: INSAT VIS
+      resampling: area-mean
+      fill_value: -32768
+    swir:
+      units: refl
+      dtype: int16
+      scale: 10000
+      source: INSAT SWIR
+      resampling: area-mean
+      fill_value: -32768
+    d_ir1_dt:
+      units: K / 15 min
+      dtype: int16
+      scale: 100
+      source: derived
+      resampling: nearest
+      fill_value: -32768
+    ir1_minus_ir2:
+      units: K
+      dtype: int16
+      scale: 100
+      source: derived
+      resampling: nearest
+      fill_value: -32768
+    wv_minus_ir1:
+      units: K
+      dtype: int16
+      scale: 100
+      source: derived
+      resampling: nearest
+      fill_value: -32768
+    ot_score:
+      units: 0-1
+      dtype: uint8
+      scale: 255
+      source: derived
+      resampling: nearest
+      fill_value: 0
+    valid_mask:
+      units: null
+      dtype: uint8
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 0
+    age_min:
+      units: min
+      dtype: int16
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 32767
+    calibrated:
+      units: null
+      dtype: uint8
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 0
+    day_flag:
+      units: null
+      dtype: uint8
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 0
+  radar:
+    zmax:
+      units: dBZ
+      dtype: int16
+      scale: 10
+      source: IMD radar
+      resampling: max
+      fill_value: -320
+    z_cappi1:
+      units: dBZ
+      dtype: int16
+      scale: 10
+      source: IMD radar volume
+      resampling: max
+      fill_value: -320
+    z_cappi2:
+      units: dBZ
+      dtype: int16
+      scale: 10
+      source: IMD radar volume
+      resampling: max
+      fill_value: -320
+    z_m10c:
+      units: dBZ
+      dtype: int16
+      scale: 10
+      source: IMD radar volume
+      resampling: max
+      fill_value: -320
+    z_m20c:
+      units: dBZ
+      dtype: int16
+      scale: 10
+      source: IMD radar volume
+      resampling: max
+      fill_value: -320
+    vil:
+      units: kg m-2
+      dtype: int16
+      scale: 100
+      source: IMD radar volume
+      resampling: max
+      fill_value: -32768
+    vil_density:
+      units: g m-3
+      dtype: int16
+      scale: 100
+      source: IMD radar volume
+      resampling: max
+      fill_value: -32768
+    mesh:
+      units: mm
+      dtype: int16
+      scale: 10
+      source: IMD radar volume
+      resampling: max
+      fill_value: -32768
+    div_lowlvl:
+      units: 1e-3 s-1
+      dtype: int16
+      scale: 100
+      source: IMD radar volume
+      resampling: signed-max-abs
+      fill_value: -32768
+    marc:
+      units: m s-1
+      dtype: int16
+      scale: 100
+      source: IMD radar volume
+      resampling: signed-max-abs
+      fill_value: -32768
+    sri:
+      units: mm h-1
+      dtype: int16
+      scale: 10
+      source: IMD radar product
+      resampling: max
+      fill_value: -32768
+    valid_mask:
+      units: null
+      dtype: uint8
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 0
+    coverage_frac:
+      units: 0-1
+      dtype: uint8
+      scale: 255
+      source: qc
+      resampling: area-mean
+      fill_value: 0
+    age_min:
+      units: min
+      dtype: int16
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 32767
+    has_velocity:
+      units: null
+      dtype: uint8
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 0
+    blocked:
+      units: null
+      dtype: uint8
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 0
+  ltg:
+    dens_5:
+      units: flashes km-2
+      dtype: int16
+      scale: 1000
+      source: IITM ILLN
+      resampling: sum
+      fill_value: 0
+    dens_15:
+      units: flashes km-2
+      dtype: int16
+      scale: 1000
+      source: IITM ILLN
+      resampling: sum
+      fill_value: 0
+    dens_30:
+      units: flashes km-2
+      dtype: int16
+      scale: 1000
+      source: IITM ILLN
+      resampling: sum
+      fill_value: 0
+    dens_30_dew:
+      units: flashes km-2
+      dtype: int16
+      scale: 1000
+      source: IITM ILLN
+      resampling: sum
+      fill_value: 0
+    cg_frac:
+      units: 0-1
+      dtype: uint8
+      scale: 255
+      source: IITM ILLN
+      resampling: nearest
+      fill_value: 0
+    valid_mask:
+      units: null
+      dtype: uint8
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 0
+    age_min:
+      units: min
+      dtype: int16
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 32767
+    health:
+      units: 0-2
+      dtype: uint8
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 0
+  nwp:
+    cape:
+      units: J kg-1
+      dtype: int16
+      scale: 1
+      source: NOAA GFS
+      resampling: bilinear
+      fill_value: -32768
+    cin:
+      units: J kg-1
+      dtype: int16
+      scale: 1
+      source: NOAA GFS
+      resampling: bilinear
+      fill_value: -32768
+    lcl:
+      units: m
+      dtype: int16
+      scale: 1
+      source: derived
+      resampling: bilinear
+      fill_value: -32768
+    shear01:
+      units: m s-1
+      dtype: int16
+      scale: 10
+      source: derived
+      resampling: bilinear
+      fill_value: -32768
+    shear06:
+      units: m s-1
+      dtype: int16
+      scale: 10
+      source: derived
+      resampling: bilinear
+      fill_value: -32768
+    pwat:
+      units: mm
+      dtype: int16
+      scale: 10
+      source: NOAA GFS
+      resampling: bilinear
+      fill_value: -32768
+    frz_lvl:
+      units: m
+      dtype: int16
+      scale: 1
+      source: derived
+      resampling: bilinear
+      fill_value: -32768
+    h_m10c:
+      units: m
+      dtype: int16
+      scale: 1
+      source: derived
+      resampling: bilinear
+      fill_value: -32768
+    h_m20c:
+      units: m
+      dtype: int16
+      scale: 1
+      source: derived
+      resampling: bilinear
+      fill_value: -32768
+    dcape_proxy:
+      units: K
+      dtype: int16
+      scale: 10
+      source: derived
+      resampling: bilinear
+      fill_value: -32768
+    mfc850:
+      units: g kg-1 s-1 x1e6
+      dtype: int16
+      scale: 1
+      source: derived
+      resampling: bilinear
+      fill_value: -32768
+    conv10m:
+      units: 1e-5 s-1
+      dtype: int16
+      scale: 1
+      source: derived
+      resampling: bilinear
+      fill_value: -32768
+    precip_rate:
+      units: mm h-1
+      dtype: int16
+      scale: 10
+      source: NOAA GFS
+      resampling: bilinear
+      fill_value: -32768
+    cycle_used:
+      units: YYYYMMDDHH
+      dtype: int32
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 0
+    age_min:
+      units: min
+      dtype: int16
+      scale: 1
+      source: qc
+      resampling: nearest
+      fill_value: 32767
+  static:
+    elevation:
+      units: m
+      dtype: int16
+      scale: 1
+      source: DEM
+      resampling: area-mean
+      fill_value: -32768
+    slope:
+      units: deg
+      dtype: int16
+      scale: 10
+      source: DEM
+      resampling: area-mean
+      fill_value: -32768
+    aspect:
+      units: deg
+      dtype: int16
+      scale: 10
+      source: DEM
+      resampling: area-mean
+      fill_value: -32768
+    blocking_index:
+      units: 0-1
+      dtype: uint8
+      scale: 255
+      source: DEM/radar sites
+      resampling: area-mean
+      fill_value: 0
+    radar_blockage_frac:
+      units: 0-1
+      dtype: uint8
+      scale: 255
+      source: DEM/radar sites
+      resampling: area-mean
+      fill_value: 0
+    land_mask:
+      units: 0/1
+      dtype: uint8
+      scale: 1
+      source: static
+      resampling: nearest
+      fill_value: 0
