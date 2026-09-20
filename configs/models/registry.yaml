@@ -1,0 +1,50 @@
+definition_version: 1
+channel_version: 1
+domain_version: 1
+models:
+  M0:
+    version: m0-numpy-fallback-0.1
+    status: research_only
+    rungs_supported: [R0, R1, R2]
+    requires: [intensity_frames, motion]
+    backend: numpy_fallback
+  M1:
+    version: m1-tracker-0.1
+    status: research_only
+    rungs_supported: [R0, R1, R2]
+    requires: [detection_channel, motion]
+  M2:
+    version: m2-ci-ltg-contract-0.1
+    status: blocked_data
+    rungs_supported: [R0, R1, R2]
+    requires: [INSAT_labels, radar_or_flash_labels]
+  M3:
+    version: m3-blend-0.1
+    status: research_only
+    rungs_supported: [R0, R1, R2, R3]
+    requires: [M0_members, nwp_precip]
+  M4:
+    version: m4-hail-rules-0.1
+    status: experimental_uncalibrated
+    rungs_supported: [R0]
+    requires: [radar_features, grade_A_or_B_hail_labels]
+  M5:
+    version: m5-downburst-score-0.1
+    status: experimental_uncalibrated
+    rungs_supported: [R0]
+    requires: [radial_velocity, AWS_gust_labels]
+  M6:
+    version: m6-cloudburst-prior-0.1
+    status: prior_only
+    rungs_supported: [R1, R2, R3]
+    requires: [HEM_radar_proxy_labels, gauge_confirmations]
+  M7:
+    version: m7-controller-0.1
+    status: research_only
+    rungs_supported: [R0, R1, R2, R3, R4]
+    requires: [modality_masks, feature_contract, ood_statistics]
+  C:
+    version: calibration-isotonic-0.1
+    status: blocked_data
+    rungs_supported: [R0, R1, R2, R3]
+    requires: [validation_truth, 2000_positive_samples_per_table]
