@@ -1,0 +1,13 @@
+{
+  "issue_time": "2026-09-21T00:00:00Z",
+  "valid_time": "2026-09-21T03:00:00Z",
+  "districts": [
+    {
+      "district": "Synthetic District",
+      "category": "Yellow",
+      "valid_from": "2026-09-21T00:00:00Z",
+      "valid_to": "2026-09-21T03:00:00Z"
+    }
+  ],
+  "fixture": true
+}

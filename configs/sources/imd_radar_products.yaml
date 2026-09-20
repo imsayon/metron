@@ -1,0 +1,22 @@
+name: imd_radar_products
+class: VIEW
+cadence_s: 300
+expected_latency_s: 480
+max_obs_age_s: 1800
+endpoint: https://mausam.imd.gov.in/Radar/{product}_{station}.gif
+auth: none
+parser: parsers.imd_radar_gif
+obs_time_rule: image_timestamp_or_arrival_minus_5m
+retention_days: 90
+attribution: "Radar: India Meteorological Department"
+terms_url: https://mausam.imd.gov.in/responsive/radar.php
+status: live
+stations:
+  - delhi
+products:
+  - caz
+  - ppz
+  - ppv
+  - sri
+  - pac
+  - vp2

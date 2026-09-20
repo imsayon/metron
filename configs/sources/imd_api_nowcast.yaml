@@ -1,0 +1,15 @@
+name: imd_api_nowcast
+class: REG
+cadence_s: 600
+expected_latency_s: 600
+max_obs_age_s: 1800
+endpoint: https://api.imd.gov.in/api/v1/districtwise-nowcast
+auth: api-key
+parser: parsers.imd_api_json
+obs_time_rule: issue_time_in_payload
+retention_days: 365
+attribution: "Nowcast baseline: India Meteorological Department"
+terms_url: https://api.imd.gov.in/public/api_reference.html
+status: live
+kind: nowcast
+scope: india
