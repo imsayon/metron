@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "metron"
+version = "0.1.0"
+description = "Provenance-first verification foundation for Metron"
+requires-python = ">=3.11,<3.15"
+dependencies = ["PyYAML>=6.0.2"]
+
+[dependency-groups]
+dev = [
+  "mypy>=1.18",
+  "pytest>=8.4",
+  "ruff>=0.13",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["metron"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["metron", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["metron/common", "metron/verify"]

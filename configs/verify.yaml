@@ -1,0 +1,40 @@
+verify_spec_version: 1
+
+run:
+  id: auto
+  frozen: false
+  domains: [pilot_e, pilot_h, national_s]
+  seasons: [pre_monsoon, monsoon, post_monsoon]
+  rungs: [R0, R1, R2, R3]
+  leads_min: [10, 20, 30, 45, 60, 90, 120, 180, 240, 300, 360]
+  scales_km: [2, 4, 8, 16, 32, 64]
+
+splits:
+  chronological:
+    train: ["2024-03-01/2024-06-30", "2025-03-01/2025-04-30", "2024-07-01/2025-09-30"]
+    validation: ["2025-05-01/2025-06-30"]
+    test: ["2026-03-01/2026-06-30"]
+    buffer_hours: 6
+  event_grouped:
+    group_by: storm_day
+  geographic_holdout:
+    train_domains: [pilot_e]
+    test_domains: [pilot_h]
+  seasonal_holdout:
+    train_seasons: [pre_monsoon]
+    test_seasons: [monsoon]
+
+products:
+  refl_prob:
+    thresholds_dbz: [20, 35, 45, 55]
+    metrics: [csi, pod, far, bias, fss, pfss, brier, reliability, crps]
+    baselines: [eulerian, lagrangian, nwp_only]
+  rain_prob:
+    thresholds_mmh: [5, 20, 50, 100]
+    metrics: [csi, fss, brier, reliability, crps]
+    baselines: [eulerian, lagrangian, nwp_only, climatology]
+  controller:
+    metrics: [abstention_rate, conditional_skill]
+
+report:
+  figure_id_scheme: "F-{module}-{metric}-{axis}-{domain}-{period}"
