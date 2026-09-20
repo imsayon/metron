@@ -1,0 +1,17 @@
+name: gfs
+class: OPEN-SCI
+cadence_s: 3600
+expected_latency_s: 16200
+endpoint: https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl
+auth: none
+parser: parsers.grib2_xarray
+obs_time_rule: forecast_valid_time
+retention_days: 90
+attribution: "NWP: NOAA Global Forecast System"
+terms_url: https://www.ncei.noaa.gov/products/weather-climate-models/global-forecast
+status: live
+forecast_steps:
+  - 0
+  - 1
+  - 2
+  - 3

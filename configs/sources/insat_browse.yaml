@@ -1,0 +1,21 @@
+name: insat_browse
+class: VIEW
+cadence_s: 300
+expected_latency_s: 1200
+max_obs_age_s: 1800
+endpoint: https://www.mosdac.gov.in/gallery/getImage.php?prod={product}
+auth: none
+parser: parsers.insat_browse
+obs_time_rule: image_header_utc
+retention_days: 30
+attribution: "Satellite: INSAT-3D/3DR/3DS (ISRO/MOSDAC)"
+terms_url: https://www.mosdac.gov.in/data-access-policy
+status: live
+products:
+  - 3SIMG_*_L1B_STD_IR1_V*.jpg
+  - 3SIMG_*_L1B_STD_IR2_V*.jpg
+  - 3SIMG_*_L1B_STD_WV_V*.jpg
+  - 3RIMG_*_L1B_STD_IR1_V*.jpg
+  - 3RIMG_*_L1B_STD_IR2_V*.jpg
+  - 3RIMG_*_L1B_STD_WV_V*.jpg
+calibrated: false
