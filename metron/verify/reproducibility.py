@@ -26,8 +26,8 @@ def data_manifest_hash(
 
 def figure_id(module: str, metric: str, axis: str, domain: str, period: str) -> str:
     parts = (module, metric, axis, domain, period)
-    if any(not part or "-" in part for part in parts):
-        raise ValueError("figure ID components must be non-empty and must not contain hyphens")
+    if any(not part.strip() for part in parts):
+        raise ValueError("figure ID components must not be empty")
     return "F-" + "-".join(parts)
 
 

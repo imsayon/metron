@@ -31,3 +31,10 @@ def test_manifest_hash_changes_with_contract_version() -> None:
     first = DataManifest((item.manifest_id,), 1, 1, 1)
     second = DataManifest((item.manifest_id,), 2, 1, 1)
     assert first.hash != second.hash
+
+
+def test_manifest_availability_uses_arrival_time() -> None:
+    item = observation()
+
+    assert not item.available_at(datetime(2026, 5, 3, 9, 34, tzinfo=UTC))
+    assert item.available_at(datetime(2026, 5, 3, 9, 35, tzinfo=UTC))

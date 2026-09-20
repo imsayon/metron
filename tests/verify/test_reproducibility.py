@@ -23,3 +23,6 @@ def test_hashes_and_run_ids_are_order_independent() -> None:
 
 def test_figure_id_matches_contract() -> None:
     assert figure_id("M2", "CSI", "lead", "pilot_e", "2026pre") == "F-M2-CSI-lead-pilot_e-2026pre"
+    assert figure_id("CMP-IMD", "CSI", "district", "pilot_e", "2026pre") == (
+        "F-CMP-IMD-CSI-district-pilot_e-2026pre"
+    )

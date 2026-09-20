@@ -55,6 +55,11 @@ class ObservationManifest:
     def manifest_id(self) -> str:
         return self.idempotency_key
 
+    def available_at(self, issue_time: datetime) -> bool:
+        """Return whether this observation could have been used at ``issue_time``."""
+
+        return self.arrival_time <= utc(issue_time, "issue_time")
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "manifest_id": self.manifest_id,
