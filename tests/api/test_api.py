@@ -10,7 +10,13 @@ FORECASTER = {"Authorization": "Bearer forecaster-token"}
 
 
 def _api() -> APIServer:
-    api = APIServer()
+    api = APIServer(
+        token_roles={
+            "viewer-token": "viewer",
+            "forecaster-token": "forecaster",
+            "admin-token": "admin",
+        }
+    )
     product = fixture_product()
     issue = product.provenance.issue_time
     api.add_product(
@@ -36,6 +42,11 @@ def _api() -> APIServer:
         }
     ]
     return api
+
+
+def test_default_auth_does_not_ship_fixture_tokens() -> None:
+    response = APIServer().handle("GET", "/v1/targets", {"Authorization": "Bearer viewer-token"})
+    assert response.status == 401
 
 
 def test_products_and_rfc7807_role_boundary() -> None:

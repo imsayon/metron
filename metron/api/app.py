@@ -149,14 +149,7 @@ def _body(value: bytes | str | Mapping[str, Any] | None) -> dict[str, Any]:
 
 class _Auth:
     def __init__(self, token_roles: Mapping[str, str | Principal] | None = None) -> None:
-        configured = token_roles or {
-            "viewer-token": "viewer",
-            "forecaster-token": "forecaster",
-            "admin-token": "admin",
-            "viewer": "viewer",
-            "forecaster": "forecaster",
-            "admin": "admin",
-        }
+        configured = token_roles or {}
         self.tokens: dict[str, Principal] = {}
         for token, value in configured.items():
             principal = value if isinstance(value, Principal) else Principal(token, value)
