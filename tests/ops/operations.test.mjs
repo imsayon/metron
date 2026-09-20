@@ -11,6 +11,7 @@ test("gateway config preserves security headers and API routing", () => {
   const caddy = read("deploy/Caddyfile");
   assert.match(caddy, /X-Content-Type-Options/);
   assert.match(caddy, /Content-Security-Policy/);
+  assert.doesNotMatch(caddy, /unsafe-eval/);
   assert.match(caddy, /reverse_proxy @api api:8000/);
   assert.match(caddy, /reverse_proxy ui:3000/);
 });
