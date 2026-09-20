@@ -111,3 +111,24 @@ def test_websocket_event_hub_delivers_product_updates() -> None:
         return await asyncio.wait_for(queue.get(), timeout=0.1)
 
     assert asyncio.run(read_event()) == {"type": "status.changed", "rung": "R1"}
+
+
+def test_asgi_preserves_non_json_cap_and_metric_bodies() -> None:
+    api = _api()
+
+    async def call(url: str) -> tuple[dict, bytes]:
+        sent: list[dict] = []
+        messages = iter([{"type": "http.request", "body": b"", "more_body": False}])
+
+        async def receive() -> dict:
+            return next(messages)
+
+        async def send(message: dict) -> None:
+            sent.append(message)
+
+        await api({"type": "http", "method": "GET", "path": url, "headers": [], "query_string": b""}, receive, send)
+        return sent[0], sent[1]["body"]
+
+    start, body = asyncio.run(call("/metrics"))
+    assert start["headers"][0] == (b"content-type", b"text/plain; version=0.0.4")
+    assert body == b"metron_products_issued_total 1\n"

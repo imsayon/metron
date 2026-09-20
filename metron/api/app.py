@@ -663,7 +663,15 @@ class APIServer:
             if query_string:
                 url += "?" + query_string.decode()
             response = self.handle(scope["method"], url, headers, bytes(body))
-            body_bytes = response.body if isinstance(response.body, bytes) else _json(response.body)
+            content_type = response.headers.get("content-type", "")
+            if isinstance(response.body, bytes):
+                body_bytes = response.body
+            elif isinstance(response.body, str) and (
+                content_type.startswith("text/") or content_type == "application/cap+xml"
+            ):
+                body_bytes = response.body.encode()
+            else:
+                body_bytes = _json(response.body)
             headers_out = [(key.lower().encode(), value.encode()) for key, value in response.headers.items()]
             headers_out.append((b"content-length", str(len(body_bytes)).encode()))
             await send({"type": "http.response.start", "status": response.status, "headers": headers_out})
