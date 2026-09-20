@@ -1,7 +1,11 @@
 import unittest
 from datetime import datetime, timezone
+from pathlib import Path
+from tempfile import TemporaryDirectory
+import json
 
 from metron.labels import LabelCatalogue, LabelEvidence, LabelEvent, LabelValidationError
+from metron.labels.cli import main
 
 
 def event(**overrides):
@@ -47,6 +51,32 @@ class LabelCatalogueTests(unittest.TestCase):
         self.assertTrue(item.research_only)
         with self.assertRaises(LabelValidationError):
             event(definition_version="2").validate()
+
+    def test_cli_add_and_grade_round_trip(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            event_file = root / "event.json"
+            catalogue_file = root / "labels.jsonl"
+            event_file.write_text(json.dumps(event().to_mapping()), encoding="utf-8")
+            self.assertEqual(
+                main(["add", "--catalogue", str(catalogue_file), "--event", str(event_file)]),
+                0,
+            )
+            self.assertEqual(
+                main(
+                    [
+                        "grade",
+                        "--catalogue",
+                        str(catalogue_file),
+                        "--event-id",
+                        "hail-001",
+                        "--grade",
+                        "C",
+                    ]
+                ),
+                0,
+            )
+            self.assertEqual(next(iter(LabelCatalogue.load_jsonl(catalogue_file))).grade, "C")
 
 
 if __name__ == "__main__":
