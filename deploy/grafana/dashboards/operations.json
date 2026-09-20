@@ -1,0 +1,52 @@
+{
+  "title": "Metron / operations",
+  "uid": "metron-operations",
+  "schemaVersion": 39,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Current rung",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "metron_current_rung", "legendFormat": "{{domain}}" }],
+      "fieldConfig": { "defaults": { "unit": "short", "min": 0, "max": 4 } }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Cycle latency p95",
+      "gridPos": { "h": 8, "w": 12, "x": 6, "y": 0 },
+      "targets": [{ "expr": "metron_cycle_latency_seconds{quantile=\"0.95\"}", "legendFormat": "{{domain}}" }],
+      "fieldConfig": { "defaults": { "unit": "s", "thresholds": { "steps": [{ "color": "green" }, { "color": "orange", "value": 180 }, { "color": "red", "value": 240 }] } } }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Source ages",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [{ "expr": "metron_source_age_seconds", "legendFormat": "{{source}}" }],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Abstentions by reason",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [{ "expr": "rate(metron_abstentions_total[15m])", "legendFormat": "{{module}} / {{reason_code}}" }],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "CAP delivery failures",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 16 },
+      "targets": [{ "expr": "increase(metron_cap_delivery_failures_total[24h])", "legendFormat": "failures" }],
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green" }, { "color": "red", "value": 1 }] } } }
+    }
+  ]
+}

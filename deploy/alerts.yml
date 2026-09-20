@@ -1,0 +1,38 @@
+groups:
+  - name: metron-operations
+    rules:
+      - alert: MetronSourceStale
+        expr: max by (source) (metron_source_age_seconds) > 900
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Metron source is stale"
+          description: "Check the source page, quarantine, and rung history before restarting anything."
+
+      - alert: MetronCycleOverrun
+        expr: metron_cycle_latency_seconds{quantile="0.95"} > 240
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Metron cycle p95 exceeds four minutes"
+          description: "Follow the runbook; do not silently publish a late cycle."
+
+      - alert: MetronRungDegraded
+        expr: max by (domain) (metron_current_rung) >= 3
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Metron is operating at R3/R4"
+          description: "Verify NWP and satellite validity and keep abstentions visible."
+
+      - alert: MetronCapDeliveryFailure
+        expr: increase(metron_cap_delivery_failures_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CAP delivery failed"
+          description: "Do not retry automatically; notify the forecaster and record the receipt failure."
