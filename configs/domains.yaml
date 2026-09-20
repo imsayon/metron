@@ -1,0 +1,28 @@
+domains:
+  pilot_e:
+    version: 1
+    crs: "+proj=lcc +lat_0=23 +lon_0=87 +lat_1=21 +lat_2=25 +datum=WGS84 +units=m +no_defs"
+    dx_m: 2000
+    nx: 500
+    ny: 450
+    upper_left_xy_m: [-500000, 450000]
+    cycle_s: 600
+    sat_cadence_s: 900
+  pilot_h:
+    version: 1
+    crs: "+proj=lcc +lat_0=31.25 +lon_0=78 +lat_1=30 +lat_2=32.5 +datum=WGS84 +units=m +no_defs"
+    dx_m: 2000
+    nx: 300
+    ny: 250
+    upper_left_xy_m: [-300000, 250000]
+    cycle_s: 600
+    sat_cadence_s: 900
+  national_s:
+    version: 1
+    crs: "EPSG:4326"
+    dx_deg: 0.04
+    nx: 800
+    ny: 800
+    upper_left_lonlat: [66.0, 38.0]
+    cycle_s: 900
+    sat_cadence_s: 1800
