@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Mapping
 
 import numpy as np
+
 from metron.grids.masks import propagate_masks
 from metron.qc.types import Provenance, QCResult, missing_qc_result
 

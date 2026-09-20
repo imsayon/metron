@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Mapping, Sequence
 
 import numpy as np
+
 from metron.qc.types import QCResult
 
 
