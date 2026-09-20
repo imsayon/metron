@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
-import base64
 import io
 import json
 import re
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping, Sequence
-from urllib.parse import urlsplit
 
 from .contracts import (
     HttpClient,
@@ -22,7 +19,6 @@ from .contracts import (
     RetryingHttpClient,
     RetryPolicy,
     SourceSpec,
-    TransportError,
     UrllibHttpClient,
     encode_query,
     parse_timestamp,
@@ -46,19 +42,25 @@ _COMPACT_RE = re.compile(
     re.IGNORECASE,
 )
 _MONTH_RE = re.compile(
-    r"(?P<day>\d{2})(?P<month>[A-Z]{3})(?P<year>20\d{2})[ T_-]?(?P<hour>\d{2})[:_-]?(?P<minute>\d{2})(?::?(?P<second>\d{2}))?",
+    r"(?P<day>\d{2})(?P<month>[A-Z]{3})(?P<year>20\d{2})[ T_-]?"
+    r"(?P<hour>\d{2})[:_-]?(?P<minute>\d{2})"
+    r"(?::?(?P<second>\d{2}))?",
     re.IGNORECASE,
 )
 
 
-def extract_timestamp(payload: bytes, url: str = "", *, ocr: Callable[[bytes], str] | None = None) -> tuple[datetime, str]:
+def extract_timestamp(
+    payload: bytes, url: str = "", *, ocr: Callable[[bytes], str] | None = None
+) -> tuple[datetime, str]:
     """Extract a source timestamp from a header, filename, or injected OCR result."""
 
     candidates = (_text(payload), url)
     for source, candidate in (("header", candidates[0]), ("url", candidates[1])):
         for match in _ISO_RE.finditer(candidate):
             try:
-                value = match.group("date") + "T" + match.group("time") + (match.group("zone") or "Z")
+                value = (
+                    match.group("date") + "T" + match.group("time") + (match.group("zone") or "Z")
+                )
                 return parse_timestamp(value), source
             except ValueError:
                 continue
@@ -230,7 +232,9 @@ class InsatBrowseAdapter(HttpAdapter):
 
     @staticmethod
     def _product_from_url(url: str) -> str:
-        match = re.search(r"(?:3[DRS]IMG|PROD)[^A-Z0-9]*(?:\d{8}[^A-Z0-9]*)?([A-Z0-9]+)", url.upper())
+        match = re.search(
+            r"(?:3[DRS]IMG|PROD)[^A-Z0-9]*(?:\d{8}[^A-Z0-9]*)?([A-Z0-9]+)", url.upper()
+        )
         return match.group(1) if match else "UNKNOWN"
 
 
@@ -248,7 +252,9 @@ class RadarDecodeSummary:
         return 0.0 if total == 0 else self.unknown_pixels / total
 
 
-def decode_radar_palette(payload: bytes, value_by_palette_index: Mapping[int, float]) -> RadarDecodeSummary:
+def decode_radar_palette(
+    payload: bytes, value_by_palette_index: Mapping[int, float]
+) -> RadarDecodeSummary:
     """Decode a configured radar image palette without guessing station colors."""
 
     try:
@@ -278,7 +284,9 @@ def decode_radar_palette(payload: bytes, value_by_palette_index: Mapping[int, fl
                 histogram=dict(histogram),
             )
     except Exception as exc:
-        raise QuarantineError("radar_image_decode_failed", payload=payload, details={"error": str(exc)}) from exc
+        raise QuarantineError(
+            "radar_image_decode_failed", payload=payload, details={"error": str(exc)}
+        ) from exc
 
 
 class ImdRadarProductAdapter(HttpAdapter):
@@ -301,7 +309,9 @@ class ImdRadarProductAdapter(HttpAdapter):
     ) -> None:
         super().__init__(spec, client=client, retry_policy=retry_policy, sleep=sleep, clock=clock)
         self.stations = [str(item) for item in (stations or spec.settings.get("stations", []))]
-        self.products = [str(item).lower() for item in (products or spec.settings.get("products", self.PRODUCTS))]
+        self.products = [
+            str(item).lower() for item in (products or spec.settings.get("products", self.PRODUCTS))
+        ]
         self.palette = dict(palette or {})
         invalid = set(self.products) - set(self.PRODUCTS)
         if invalid:
@@ -481,7 +491,9 @@ _ISSUE_KEYS = {
 _VALID_KEYS = {"validtime", "validfrom", "validuntil", "validto", "validity"}
 
 
-def _timestamp_fields(value: Any, *, top_level: bool = False) -> tuple[datetime | None, datetime | None, list[datetime]]:
+def _timestamp_fields(
+    value: Any, *, top_level: bool = False
+) -> tuple[datetime | None, datetime | None, list[datetime]]:
     issue: datetime | None = None
     valid: datetime | None = None
     all_times: list[datetime] = []
@@ -566,7 +578,14 @@ class ImdApiAdapter(HttpAdapter):
         headers = {"Accept": "application/json"}
         if api_key:
             headers["x-api-key"] = api_key
-        super().__init__(spec, client=client, retry_policy=retry_policy, sleep=sleep, clock=clock, headers=headers)
+        super().__init__(
+            spec,
+            client=client,
+            retry_policy=retry_policy,
+            sleep=sleep,
+            clock=clock,
+            headers=headers,
+        )
         self.endpoint = endpoint or spec.endpoint
         self.kind = kind
         self.scope = scope
@@ -590,17 +609,23 @@ class ImdApiAdapter(HttpAdapter):
         if issue is None and all_times:
             issue = all_times[0]
         if issue is None:
-            raise QuarantineError("missing_source_timestamp", url=self.endpoint, payload=response.body)
+            raise QuarantineError(
+                "missing_source_timestamp", url=self.endpoint, payload=response.body
+            )
         valid = valid or issue
         obs_time = issue
         metadata: dict[str, Any] = {
             "kind": self.kind,
             "scope": self.scope,
-            "category_count": len(parse_nowcast_categories(payload)) if "nowcast" in self.kind else 0,
+            "category_count": len(parse_nowcast_categories(payload))
+            if "nowcast" in self.kind
+            else 0,
             "source_class": self.spec.access_class,
         }
         if all_times:
-            metadata["payload_times"] = [item.isoformat().replace("+00:00", "Z") for item in all_times[:64]]
+            metadata["payload_times"] = [
+                item.isoformat().replace("+00:00", "Z") for item in all_times[:64]
+            ]
         arrival = response.received_at or self.clock()
         _check_time(obs_time, arrival, max_age_s=self._max_age())
         yield Observation(

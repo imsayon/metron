@@ -4,13 +4,11 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from collections.abc import Iterator, Mapping
-from datetime import datetime
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
 from .contracts import ManifestRecord, parse_timestamp, timestamp_text
-
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS obs_manifest (

@@ -16,7 +16,6 @@ from metron.ingest import (
     parse_nowcast_categories,
 )
 
-
 UTC = timezone.utc
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "sources"
 
@@ -65,7 +64,9 @@ def test_insat_browse_extracts_header_timestamp_and_marks_uncalibrated() -> None
     adapter = InsatBrowseAdapter(
         spec("insat_browse", url),
         [url],
-        client=FakeClient(response(url, fixture_bytes("insat_browse.synthetic.jpg.b64"), "image/jpeg")),
+        client=FakeClient(
+            response(url, fixture_bytes("insat_browse.synthetic.jpg.b64"), "image/jpeg")
+        ),
         retry_policy=RetryPolicy(attempts=1),
     )
 
@@ -110,7 +111,9 @@ def test_gfs_adapter_separates_issue_and_valid_time() -> None:
         spec("gfs", url),
         cycle=cycle,
         steps=[3],
-        client=FakeClient(response(url, fixture_bytes("gfs.synthetic.grib2.b64"), "application/octet-stream")),
+        client=FakeClient(
+            response(url, fixture_bytes("gfs.synthetic.grib2.b64"), "application/octet-stream")
+        ),
         retry_policy=RetryPolicy(attempts=1),
     )
 
@@ -145,5 +148,11 @@ def test_imd_api_adapter_archives_payload_and_extracts_categories() -> None:
 def test_committed_source_manifests_are_loadable() -> None:
     specs = load_source_specs(Path(__file__).parents[2] / "configs" / "sources")
 
-    assert set(specs) == {"gfs", "imd_api_aws", "imd_api_nowcast", "imd_radar_products", "insat_browse"}
+    assert set(specs) == {
+        "gfs",
+        "imd_api_aws",
+        "imd_api_nowcast",
+        "imd_radar_products",
+        "insat_browse",
+    }
     assert specs["insat_browse"].settings["calibrated"] is False

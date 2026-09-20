@@ -10,7 +10,6 @@ from metron.ingest import (
     TransportError,
 )
 
-
 UTC = timezone.utc
 
 
@@ -85,7 +84,9 @@ def test_runner_quarantines_untimed_payload_and_does_not_manifest_it(tmp_path) -
         def get(self, url: str, *, headers=None, timeout_s=30.0):
             return response
 
-    adapter = InsatBrowseAdapter(source_spec(), [url], client=Client(), retry_policy=RetryPolicy(attempts=1))
+    adapter = InsatBrowseAdapter(
+        source_spec(), [url], client=Client(), retry_policy=RetryPolicy(attempts=1)
+    )
     with ManifestStore() as store:
         result = IngestRunner(store, quarantine_root=tmp_path / "quarantine").run_once(adapter)
 

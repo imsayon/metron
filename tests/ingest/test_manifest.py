@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 
 from metron.ingest import ManifestRecord, ManifestStore, Observation
 
-
 UTC = timezone.utc
 
 

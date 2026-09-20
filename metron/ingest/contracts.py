@@ -7,14 +7,12 @@ into grids belongs to QC/grids; T1 records what arrived and why it was accepted.
 from __future__ import annotations
 
 import hashlib
-import json
 import os
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
-from email.message import Message
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Iterable, Mapping, Protocol, Sequence
+from typing import Any, Callable, Iterable, Mapping, Protocol
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -83,7 +81,7 @@ def parse_timestamp(value: Any, *, assume_utc: bool = True) -> datetime:
             except ValueError:
                 continue
         if parsed is None:
-            raise ValueError(f"unrecognized timestamp: {value!r}")
+            raise ValueError(f"unrecognized timestamp: {value!r}") from None
     if parsed.tzinfo is None:
         if not assume_utc:
             raise ValueError(f"timestamp has no timezone: {value!r}")
@@ -286,8 +284,7 @@ class HttpClient(Protocol):
         *,
         headers: Mapping[str, str] | None = None,
         timeout_s: float = 30.0,
-    ) -> HttpResponse:
-        ...
+    ) -> HttpResponse: ...
 
 
 class IngestError(Exception):
@@ -339,7 +336,9 @@ class RetryPolicy:
 class UrllibHttpClient:
     """Stdlib HTTP client; no source-specific dependency or credential store."""
 
-    def __init__(self, *, user_agent: str = "Metron-ingest/0.1", max_bytes: int = 64 * 1024 * 1024) -> None:
+    def __init__(
+        self, *, user_agent: str = "Metron-ingest/0.1", max_bytes: int = 64 * 1024 * 1024
+    ) -> None:
         self.user_agent = user_agent
         self.max_bytes = max_bytes
 

@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import json
-import mimetypes
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any, Mapping
 
 from .contracts import (
     ManifestRecord,
@@ -15,7 +14,6 @@ from .contracts import (
     QuarantineError,
     SourceAdapter,
     SourceSpec,
-    TransportError,
     sha256_bytes,
     timestamp_text,
     utc_now,
@@ -51,7 +49,12 @@ class PayloadArchive:
             return observation.path
         digest = observation.payload_sha256
         date = observation.obs_time.strftime("%Y/%m/%d")
-        directory = self.root / _safe_part(observation.source) / _safe_part(observation.station_or_sat) / date
+        directory = (
+            self.root
+            / _safe_part(observation.source)
+            / _safe_part(observation.station_or_sat)
+            / date
+        )
         directory.mkdir(parents=True, exist_ok=True)
         destination = directory / f"{digest}{_suffix(observation.content_type)}"
         if not destination.exists():
@@ -105,7 +108,9 @@ class QuarantineSink:
                 "payload_path": str(payload_path) if payload_path else None,
                 "details": dict(error.details),
             }
-            metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            metadata_path.write_text(
+                json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+            )
         return QuarantineItem(
             source=source,
             reason=error.reason,
@@ -142,9 +147,15 @@ class HealthSnapshot:
             "quarantined": self.quarantined,
             "failures": self.failures,
             "consecutive_failures": self.consecutive_failures,
-            "last_attempt": None if self.last_attempt is None else timestamp_text(self.last_attempt),
-            "last_success": None if self.last_success is None else timestamp_text(self.last_success),
-            "last_failure": None if self.last_failure is None else timestamp_text(self.last_failure),
+            "last_attempt": None
+            if self.last_attempt is None
+            else timestamp_text(self.last_attempt),
+            "last_success": None
+            if self.last_success is None
+            else timestamp_text(self.last_success),
+            "last_failure": None
+            if self.last_failure is None
+            else timestamp_text(self.last_failure),
             "last_observation": None
             if self.last_observation is None
             else timestamp_text(self.last_observation),
@@ -195,7 +206,9 @@ class SourceHealth:
         else:
             age = current - self.last_success
             healthy_window = timedelta(seconds=self.spec.expected_latency_s + self.spec.cadence_s)
-            grace_window = timedelta(seconds=max(self.spec.cadence_s * 3, self.spec.expected_latency_s * 2))
+            grace_window = timedelta(
+                seconds=max(self.spec.cadence_s * 3, self.spec.expected_latency_s * 2)
+            )
             if age <= healthy_window and self.consecutive_failures == 0:
                 status = "healthy"
             elif age <= grace_window:
@@ -288,7 +301,9 @@ class IngestRunner:
                     accepted.append(record)
                     state.success(observation)
                 except QuarantineError as error:
-                    item = self.quarantine.record(spec.name, error, recorded_at=self.clock().astimezone(UTC))
+                    item = self.quarantine.record(
+                        spec.name, error, recorded_at=self.clock().astimezone(UTC)
+                    )
                     quarantined.append(item)
                     state.quarantine(error, item.recorded_at)
                 except (ValueError, TypeError) as error:
@@ -297,11 +312,15 @@ class IngestRunner:
                         payload=observation.payload,
                         details={"error": str(error)},
                     )
-                    item = self.quarantine.record(spec.name, wrapped, recorded_at=self.clock().astimezone(UTC))
+                    item = self.quarantine.record(
+                        spec.name, wrapped, recorded_at=self.clock().astimezone(UTC)
+                    )
                     quarantined.append(item)
                     state.quarantine(wrapped, item.recorded_at)
         except QuarantineError as error:
-            item = self.quarantine.record(spec.name, error, recorded_at=self.clock().astimezone(UTC))
+            item = self.quarantine.record(
+                spec.name, error, recorded_at=self.clock().astimezone(UTC)
+            )
             quarantined.append(item)
             state.quarantine(error, item.recorded_at)
         except Exception as error:  # transport and adapter bugs are visible in the result
