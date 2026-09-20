@@ -9,6 +9,7 @@ description = "Provenance-first verification foundation for Metron"
 requires-python = ">=3.11,<3.15"
 dependencies = [
   "numpy>=2.0",
+  "Pillow>=11.3",
   "PyYAML>=6.0.2",
 ]
 
