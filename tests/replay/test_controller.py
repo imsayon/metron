@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
-
 from metron.replay import Manifest, ReplayController, ReplayError, namespace_for
 
 
@@ -29,7 +28,10 @@ def test_replay_releases_raw_manifests_on_virtual_arrival_time() -> None:
     assert controller.advance(state.replay_id, 0.2)[0].source == "sat"
     assert controller.advance(state.replay_id, 0.3)[0].source == "radar"
     assert controller.get(state.replay_id).cursor == 2
-    assert namespace_for(state.replay_id, "products") in controller.get(state.replay_id).to_dict()["namespace"]["products"]
+    assert (
+        namespace_for(state.replay_id, "products")
+        in controller.get(state.replay_id).to_dict()["namespace"]["products"]
+    )
 
 
 def test_replay_rejects_non_raw_input_and_invalid_clock() -> None:

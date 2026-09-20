@@ -9,7 +9,6 @@ from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping
 
-
 KNOWN_HAZARDS = {"lightning", "thunderstorm", "hail", "downburst", "cloudburst", "rain"}
 NUMBER_RE = re.compile(r"(?<![A-Za-z])[-+]?\d+(?:[.,]\d+)?")
 
@@ -49,16 +48,24 @@ def _hazards(payload: Mapping[str, Any]) -> set[str]:
     return {str(item).lower() for item in raw}
 
 
-def check_explanation(text: str, payload: Mapping[str, Any], audience: str = "public") -> tuple[bool, tuple[str, ...]]:
+def check_explanation(
+    text: str, payload: Mapping[str, Any], audience: str = "public"
+) -> tuple[bool, tuple[str, ...]]:
     required = _numbers(payload)
     present = set(_text_numbers(text))
     missing = [f"number:{value}" for value in required if value not in present]
-    watermark = str(payload.get("provenance", {}).get("watermark", "EXPERIMENTAL GUIDANCE — NOT AN OFFICIAL IMD WARNING"))
+    watermark = str(
+        payload.get("provenance", {}).get(
+            "watermark", "EXPERIMENTAL GUIDANCE — NOT AN OFFICIAL IMD WARNING"
+        )
+    )
     if watermark not in text:
         missing.append("watermark")
     target = payload.get("target")
     if not target and payload.get("arrival"):
-        first = payload["arrival"][0] if isinstance(payload["arrival"], list) else payload["arrival"]
+        first = (
+            payload["arrival"][0] if isinstance(payload["arrival"], list) else payload["arrival"]
+        )
         target = first.get("target", {}) if isinstance(first, Mapping) else {}
     target_name = target.get("name") if isinstance(target, Mapping) else None
     if target_name and str(target_name) not in text:
@@ -122,12 +129,28 @@ class ExplanationService:
 
     def _template(self, payload: Mapping[str, Any], language: str) -> str:
         rows = payload.get("arrival", payload.get("arrivals", []))
-        row = rows[0] if isinstance(rows, list) and rows else rows if isinstance(rows, Mapping) else {}
+        row = (
+            rows[0]
+            if isinstance(rows, list) and rows
+            else rows
+            if isinstance(rows, Mapping)
+            else {}
+        )
         target = payload.get("target") or row.get("target", {})
-        target_name = target.get("name", target.get("target_id", "selected target")) if isinstance(target, Mapping) else "selected target"
+        target_name = (
+            target.get("name", target.get("target_id", "selected target"))
+            if isinstance(target, Mapping)
+            else "selected target"
+        )
         hazard_values = payload.get("hazards", [payload.get("product", "hazard")])
-        hazard = ", ".join(str(item) for item in hazard_values) if not isinstance(hazard_values, str) else hazard_values
-        watermark = payload.get("provenance", {}).get("watermark", "EXPERIMENTAL GUIDANCE — NOT AN OFFICIAL IMD WARNING")
+        hazard = (
+            ", ".join(str(item) for item in hazard_values)
+            if not isinstance(hazard_values, str)
+            else hazard_values
+        )
+        watermark = payload.get("provenance", {}).get(
+            "watermark", "EXPERIMENTAL GUIDANCE — NOT AN OFFICIAL IMD WARNING"
+        )
         if not row:
             return f"{hazard} guidance near {target_name}. {watermark}"
         return (

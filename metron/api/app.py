@@ -26,7 +26,6 @@ from metron.replay.controller import ReplayController, ReplayError
 from .cap import CAPComposer
 from .explain import ExplanationService
 
-
 ROLE_LEVEL = {"viewer": 1, "forecaster": 2, "admin": 3}
 
 
@@ -112,7 +111,9 @@ def _json(value: Any) -> bytes:
 
 def _query(url: str) -> tuple[str, dict[str, str]]:
     parsed = urlsplit(url)
-    return parsed.path, {key: values[-1] for key, values in parse_qs(parsed.query).items() if values}
+    return parsed.path, {
+        key: values[-1] for key, values in parse_qs(parsed.query).items() if values
+    }
 
 
 def _datetime(value: str, name: str) -> datetime:
@@ -216,11 +217,15 @@ class APIServer:
         self.auth = _Auth(token_roles)
         self.clock = clock
         self.hub = EventHub()
-        self.products: list[ProductSummary] = [validate_product_summary(item) for item in products or []]
+        self.products: list[ProductSummary] = [
+            validate_product_summary(item) for item in products or []
+        ]
         self.objects: dict[tuple[str, str], list[dict[str, Any]]] = {}
         self.arrivals: dict[tuple[str, str], list[dict[str, Any]]] = {}
         self.verification: list[dict[str, Any]] = []
-        self.targets: dict[str, Target] = {item.target_id: item for item in DEFAULT_TARGETS} if seed_defaults else {}
+        self.targets: dict[str, Target] = (
+            {item.target_id: item for item in DEFAULT_TARGETS} if seed_defaults else {}
+        )
         self.replay = ReplayController()
         self.manifests = list(manifests or [])
         self.cap = CAPComposer()
@@ -293,7 +298,11 @@ class APIServer:
         if path in {"/openapi.json", "/v1/openapi.json"} and method == "GET":
             return self._json_response(200, self.openapi())
         if path in {"/metrics", "/v1/metrics"} and method == "GET":
-            return Response(200, "metron_products_issued_total %d\n" % len(self.products), {"content-type": "text/plain; version=0.0.4"})
+            return Response(
+                200,
+                "metron_products_issued_total %d\n" % len(self.products),
+                {"content-type": "text/plain; version=0.0.4"},
+            )
         if not path.startswith("/v1"):
             raise Problem(404, "Not Found", "route does not exist", instance=path)
         route = path[3:] or "/"
@@ -303,7 +312,13 @@ class APIServer:
         if route == "/status" and method == "GET":
             return self._json_response(200, self._status())
         if route == "/products" and method == "GET":
-            return self._json_response(200, {"items": [item.to_dict() for item in self._list_products(query)], "next_cursor": None})
+            return self._json_response(
+                200,
+                {
+                    "items": [item.to_dict() for item in self._list_products(query)],
+                    "next_cursor": None,
+                },
+            )
         if route.startswith("/products/") and method == "GET":
             product_name = unquote(route.split("/", 2)[2])
             return self._json_response(200, self._get_product(product_name, query))
@@ -358,7 +373,9 @@ class APIServer:
             return self._explain(unquote(route.split("/", 2)[2]), query)
         if route == "/targets" and method == "GET":
             self._require(principal, "viewer")
-            return self._json_response(200, {"items": [item.to_dict() for item in self.targets.values()]})
+            return self._json_response(
+                200, {"items": [item.to_dict() for item in self.targets.values()]}
+            )
         if route == "/targets" and method == "POST":
             self._require(principal, "forecaster")
             target = self._target(_body(raw_body))
@@ -440,12 +457,19 @@ class APIServer:
         return query["domain"], _iso(_datetime(query["issue_time"], "issue_time"))
 
     def _objects(self, query: Mapping[str, str]) -> dict[str, Any]:
-        return {"type": "FeatureCollection", "features": self.objects.get(self._issue_key(query), [])}
+        return {
+            "type": "FeatureCollection",
+            "features": self.objects.get(self._issue_key(query), []),
+        }
 
     def _arrivals(self, query: Mapping[str, str]) -> dict[str, Any]:
         values = self.arrivals.get(self._issue_key(query), [])
         if query.get("target"):
-            values = [item for item in values if item.get("target", {}).get("target_id") == query["target"]]
+            values = [
+                item
+                for item in values
+                if item.get("target", {}).get("target_id") == query["target"]
+            ]
         return {"items": values}
 
     def _abstentions(self, query: Mapping[str, str]) -> dict[str, Any]:
@@ -487,7 +511,11 @@ class APIServer:
         resolved: list[dict[str, Any]] = []
         for value in values:
             target = self.targets.get(value) if isinstance(value, str) else None
-            if target is None and isinstance(value, Mapping) and value.get("target_id") in self.targets:
+            if (
+                target is None
+                and isinstance(value, Mapping)
+                and value.get("target_id") in self.targets
+            ):
                 target = self.targets[value["target_id"]]
             if target is None:
                 raise Problem(400, "Invalid target", f"unknown target: {value}")
@@ -508,7 +536,13 @@ class APIServer:
             sequence += 1
             alert_id = f"metron-{domain}-{issue_time.strftime('%Y%m%dT%H%M%SZ')}-{sequence}"
         arrival = data.get("arrival", [])
-        row = arrival[0] if isinstance(arrival, list) and arrival else arrival if isinstance(arrival, Mapping) else {}
+        row = (
+            arrival[0]
+            if isinstance(arrival, list) and arrival
+            else arrival
+            if isinstance(arrival, Mapping)
+            else {}
+        )
         probability = float(data.get("probability", row.get("p_arrival", 0)))
         t10 = int(row["t10_min"]) if row.get("t10_min") is not None else None
         t90 = int(row["t90_min"]) if row.get("t90_min") is not None else None
@@ -529,7 +563,9 @@ class APIServer:
             "target": targets[0] if targets else {},
             "provenance": {"watermark": "EXPERIMENTAL GUIDANCE — NOT AN OFFICIAL IMD WARNING"},
         }
-        explanation = self.explain.generate(payload, language=str(data.get("language", "en")), audience="forecaster")
+        explanation = self.explain.generate(
+            payload, language=str(data.get("language", "en")), audience="forecaster"
+        )
         self.alerts[alert_id] = {
             "alert_id": alert_id,
             "status": "Test",
@@ -585,7 +621,9 @@ class APIServer:
             },
         )
 
-    def _record_audit(self, alert_id: str, action: str, principal: Principal, details: Mapping[str, Any]) -> None:
+    def _record_audit(
+        self, alert_id: str, action: str, principal: Principal, details: Mapping[str, Any]
+    ) -> None:
         item = {
             "action": action,
             "actor": principal.subject,
@@ -635,17 +673,32 @@ class APIServer:
                 "/v1/products": {"get": {"security": [{"bearerAuth": []}]}},
                 "/v1/products/{product}": {"get": {"security": [{"bearerAuth": []}]}},
                 "/v1/replay": {"post": {"security": [{"bearerAuth": []}], "x-role": "forecaster"}},
-                "/v1/replay/{id}": {"get": {"security": [{"bearerAuth": []}]}, "delete": {"x-role": "forecaster"}},
+                "/v1/replay/{id}": {
+                    "get": {"security": [{"bearerAuth": []}]},
+                    "delete": {"x-role": "forecaster"},
+                },
                 "/v1/review/{issue}/draft-cap": {"post": {"x-role": "forecaster"}},
                 "/v1/review/{alert_id}/approve": {"post": {"x-role": "forecaster"}},
                 "/v1/explain/{issue}": {"get": {"security": [{"bearerAuth": []}]}},
-                "/v1/targets": {"get": {"security": [{"bearerAuth": []}]}, "post": {"x-role": "forecaster"}},
-                "/v1/targets/{target_id}": {"put": {"x-role": "forecaster"}, "delete": {"x-role": "forecaster"}},
-                "/v1/ws": {"get": {"description": "WebSocket products.issued/status.changed/replay.tick events"}},
+                "/v1/targets": {
+                    "get": {"security": [{"bearerAuth": []}]},
+                    "post": {"x-role": "forecaster"},
+                },
+                "/v1/targets/{target_id}": {
+                    "put": {"x-role": "forecaster"},
+                    "delete": {"x-role": "forecaster"},
+                },
+                "/v1/ws": {
+                    "get": {
+                        "description": "WebSocket products.issued/status.changed/replay.tick events"
+                    }
+                },
             },
             "components": {
                 "securitySchemes": {"bearerAuth": {"type": "http", "scheme": "bearer"}},
-                "schemas": {"Problem": {"type": "object", "required": ["type", "title", "status", "detail"]}},
+                "schemas": {
+                    "Problem": {"type": "object", "required": ["type", "title", "status", "detail"]}
+                },
             },
         }
 
@@ -672,9 +725,13 @@ class APIServer:
                 body_bytes = response.body.encode()
             else:
                 body_bytes = _json(response.body)
-            headers_out = [(key.lower().encode(), value.encode()) for key, value in response.headers.items()]
+            headers_out = [
+                (key.lower().encode(), value.encode()) for key, value in response.headers.items()
+            ]
             headers_out.append((b"content-length", str(len(body_bytes)).encode()))
-            await send({"type": "http.response.start", "status": response.status, "headers": headers_out})
+            await send(
+                {"type": "http.response.start", "status": response.status, "headers": headers_out}
+            )
             await send({"type": "http.response.body", "body": body_bytes})
             return
         if scope["type"] == "websocket":
@@ -695,7 +752,9 @@ class APIServer:
         event_task = asyncio.create_task(queue.get())
         try:
             while True:
-                done, _ = await asyncio.wait({receive_task, event_task}, return_when=asyncio.FIRST_COMPLETED)
+                done, _ = await asyncio.wait(
+                    {receive_task, event_task}, return_when=asyncio.FIRST_COMPLETED
+                )
                 if receive_task in done:
                     message = receive_task.result()
                     if message.get("type") == "websocket.disconnect":
@@ -705,7 +764,9 @@ class APIServer:
                     receive_task = asyncio.create_task(receive())
                 if event_task in done:
                     event = event_task.result()
-                    await send({"type": "websocket.send", "text": json.dumps(event, ensure_ascii=False)})
+                    await send(
+                        {"type": "websocket.send", "text": json.dumps(event, ensure_ascii=False)}
+                    )
                     event_task = asyncio.create_task(queue.get())
         finally:
             receive_task.cancel()

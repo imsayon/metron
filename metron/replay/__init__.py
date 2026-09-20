@@ -3,8 +3,8 @@
 from .controller import (
     Manifest,
     ReplayController,
-    ReplayEvent,
     ReplayError,
+    ReplayEvent,
     ReplayState,
     namespace_for,
 )

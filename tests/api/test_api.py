@@ -1,10 +1,9 @@
-from datetime import datetime, timedelta, timezone
 import asyncio
+from datetime import timedelta
 from urllib.parse import quote
 
 from metron.api import APIServer
 from metron.products import fixture_product
-
 
 VIEWER = {"Authorization": "Bearer viewer-token"}
 FORECASTER = {"Authorization": "Bearer forecaster-token"}
@@ -62,7 +61,12 @@ def test_replay_targets_and_cap_approval_are_audited() -> None:
         "POST",
         "/v1/replay",
         FORECASTER,
-        {"domain": "pilot_e", "t_start": "2026-05-03T09:30:00Z", "t_end": "2026-05-03T10:30:00Z", "speed": 20},
+        {
+            "domain": "pilot_e",
+            "t_start": "2026-05-03T09:30:00Z",
+            "t_end": "2026-05-03T10:30:00Z",
+            "speed": 20,
+        },
     )
     assert replay.status == 202
     assert replay.json["namespace"]["products"].startswith("products/replay/")
@@ -71,7 +75,13 @@ def test_replay_targets_and_cap_approval_are_audited() -> None:
         "POST",
         "/v1/targets",
         FORECASTER,
-        {"target_id": "TEST", "kind": "hospital", "name": "Test", "latitude": 22.5, "longitude": 88.3},
+        {
+            "target_id": "TEST",
+            "kind": "hospital",
+            "name": "Test",
+            "latitude": 22.5,
+            "longitude": 88.3,
+        },
     )
     assert custom.status == 201
     assert api.handle("DELETE", "/v1/targets/VECC", FORECASTER).status == 409
@@ -81,13 +91,20 @@ def test_replay_targets_and_cap_approval_are_audited() -> None:
         "POST",
         f"/v1/review/{issue}/draft-cap",
         FORECASTER,
-        {"domain": "pilot_e", "hazards": ["lightning"], "targets": ["VECC"], "arrival": api.arrivals[("pilot_e", "2026-05-03T09:30:00Z")]},
+        {
+            "domain": "pilot_e",
+            "hazards": ["lightning"],
+            "targets": ["VECC"],
+            "arrival": api.arrivals[("pilot_e", "2026-05-03T09:30:00Z")],
+        },
     )
     assert draft.status == 201
     assert draft.json["status"] == "Test"
     assert draft.json["explanation"]["numbers_checked"] is True
     alert_id = draft.json["alert_id"]
-    approved = api.handle("POST", f"/v1/review/{alert_id}/approve", FORECASTER, {"notes": "reviewed"})
+    approved = api.handle(
+        "POST", f"/v1/review/{alert_id}/approve", FORECASTER, {"notes": "reviewed"}
+    )
     assert approved.status == 200
     assert approved.json["status"] == "Actual"
     assert approved.json["external_delivery"] == "disabled"
@@ -126,7 +143,11 @@ def test_asgi_preserves_non_json_cap_and_metric_bodies() -> None:
         async def send(message: dict) -> None:
             sent.append(message)
 
-        await api({"type": "http", "method": "GET", "path": url, "headers": [], "query_string": b""}, receive, send)
+        await api(
+            {"type": "http", "method": "GET", "path": url, "headers": [], "query_string": b""},
+            receive,
+            send,
+        )
         return sent[0], sent[1]["body"]
 
     start, body = asyncio.run(call("/metrics"))

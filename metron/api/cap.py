@@ -6,7 +6,6 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Iterable
 from xml.etree import ElementTree
 
-
 CAP_NS = "urn:oasis:names:tc:emergency:cap:1.2"
 ElementTree.register_namespace("", CAP_NS)
 
@@ -60,11 +59,15 @@ class CAPComposer:
         if not hazard_names:
             raise ValueError("at least one hazard is required")
         target_list = tuple(targets)
-        target_text = ", ".join(str(item.get("name", item.get("target_id", "target"))) for item in target_list)
+        target_text = ", ".join(
+            str(item.get("name", item.get("target_id", "target"))) for item in target_list
+        )
         event = "/".join(hazard_names)
         issue = _utc(issue_time)
         onset = issue + (timedelta(minutes=t10_min) if t10_min is not None else timedelta(0))
-        expires = issue + (timedelta(minutes=t90_min) if t90_min is not None else timedelta(hours=6))
+        expires = issue + (
+            timedelta(minutes=t90_min) if t90_min is not None else timedelta(hours=6)
+        )
         root = ElementTree.Element(f"{{{CAP_NS}}}alert")
         _add(root, "identifier", alert_id)
         _add(root, "sender", self.sender)
@@ -78,8 +81,16 @@ class CAPComposer:
         _add(info, "event", f"{event} nowcast guidance (experimental)")
         urgency = "Immediate" if t10_min is not None and t10_min <= 30 else "Expected"
         _add(info, "urgency", urgency)
-        _add(info, "severity", "Severe" if probability >= 0.7 else "Moderate" if probability >= 0.4 else "Minor")
-        _add(info, "certainty", "Likely" if probability >= 0.6 else "Possible" if probability >= 0.3 else "Unlikely")
+        _add(
+            info,
+            "severity",
+            "Severe" if probability >= 0.7 else "Moderate" if probability >= 0.4 else "Minor",
+        )
+        _add(
+            info,
+            "certainty",
+            "Likely" if probability >= 0.6 else "Possible" if probability >= 0.3 else "Unlikely",
+        )
         _add(info, "onset", _iso(onset))
         _add(info, "expires", _iso(min(expires, issue + timedelta(hours=6))))
         _add(info, "senderName", self.sender_name)
@@ -90,7 +101,9 @@ class CAPComposer:
             "description",
             description or f"{headline}. {self.sender_name}",
         )
-        _add(info, "instruction", "Treat as experimental guidance and seek forecaster confirmation.")
+        _add(
+            info, "instruction", "Treat as experimental guidance and seek forecaster confirmation."
+        )
         for key, value in {
             "domain": domain,
             "probability": probability,

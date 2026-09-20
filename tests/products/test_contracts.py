@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
-
 from metron.products import (
     ContractError,
     InputProvenance,

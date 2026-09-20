@@ -187,7 +187,10 @@ class ProductSummary:
             raise ContractError("effective_resolution_km must be positive")
         if any(not isfinite(float(value)) for value in self.stats.values()):
             raise ContractError("stats must contain only finite numbers")
-        if any(left > right for left, right in zip(self.legend_bins, self.legend_bins[1:])):
+        if any(
+            left > right
+            for left, right in zip(self.legend_bins, self.legend_bins[1:], strict=False)
+        ):
             raise ContractError("legend_bins must be ordered")
 
     def to_dict(self) -> dict[str, Any]:
@@ -256,7 +259,9 @@ def validate_provenance(value: Provenance | Mapping[str, Any]) -> Provenance:
         return value
     try:
         inputs = tuple(
-            item if isinstance(item, InputProvenance) else InputProvenance(
+            item
+            if isinstance(item, InputProvenance)
+            else InputProvenance(
                 source=item["source"],
                 obs_time=item.get("obs_time"),
                 age_min=item.get("age_min"),
@@ -267,7 +272,9 @@ def validate_provenance(value: Provenance | Mapping[str, Any]) -> Provenance:
             for item in value.get("inputs", ())
         )
         abstentions = tuple(
-            item if isinstance(item, Abstention) else Abstention(
+            item
+            if isinstance(item, Abstention)
+            else Abstention(
                 module=item["module"],
                 reason_code=item["reason_code"],
                 detail=item.get("detail"),
@@ -291,9 +298,7 @@ def validate_provenance(value: Provenance | Mapping[str, Any]) -> Provenance:
             research=bool(value.get("research", False)),
             inputs=inputs,
             abstentions=abstentions,
-            watermark=value.get(
-                "watermark", "EXPERIMENTAL GUIDANCE — NOT AN OFFICIAL IMD WARNING"
-            ),
+            watermark=value.get("watermark", "EXPERIMENTAL GUIDANCE — NOT AN OFFICIAL IMD WARNING"),
         )
     except (KeyError, TypeError, ValueError) as exc:
         raise ContractError(f"invalid provenance: {exc}") from exc

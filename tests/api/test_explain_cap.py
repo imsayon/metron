@@ -29,6 +29,6 @@ def test_cap_starts_in_test_mode_and_contains_experimental_sender() -> None:
         t10_min=35,
         t90_min=80,
     )
-    assert f"xmlns=\"{CAP_NS}\"" in xml
+    assert f'xmlns="{CAP_NS}"' in xml
     assert "<status>Test</status>" in xml
     assert "not an official IMD warning" in xml

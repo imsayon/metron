@@ -83,15 +83,11 @@ class ProductWriter:
                 {
                     "type": "products.issued",
                     "domain": product.provenance.domain,
-                    "issue_time": product.provenance.issue_time.isoformat().replace(
-                        "+00:00", "Z"
-                    ),
+                    "issue_time": product.provenance.issue_time.isoformat().replace("+00:00", "Z"),
                     "product": product.product,
                     "lead_min": product.lead_min,
                     "rung": product.provenance.rung,
-                    "abstentions": [
-                        item.to_dict() for item in product.provenance.abstentions
-                    ],
+                    "abstentions": [item.to_dict() for item in product.provenance.abstentions],
                     "mode": product.provenance.mode,
                     "replay_id": product.provenance.replay_id,
                 }

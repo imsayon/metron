@@ -2,11 +2,11 @@
 
 from .contracts import (
     Abstention,
+    ContractError,
     InputProvenance,
     ProductSummary,
     Provenance,
     Target,
-    ContractError,
     fixture_product,
     validate_product_summary,
     validate_provenance,
