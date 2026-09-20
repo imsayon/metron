@@ -9,7 +9,7 @@ from typing import Iterable
 
 import numpy as np
 
-from .contracts import ContractValidationError, VALID_RUNGS
+from .contracts import VALID_RUNGS, ContractValidationError
 
 
 @dataclass(frozen=True)
@@ -53,7 +53,7 @@ def _pava(probabilities: np.ndarray, outcomes: np.ndarray) -> tuple[np.ndarray, 
     x = probabilities[order]
     y = outcomes[order]
     blocks: list[list[float]] = []  # [x_sum, y_sum, weight]
-    for xi, yi in zip(x, y):
+    for xi, yi in zip(x, y, strict=True):
         blocks.append([float(xi), float(yi), 1.0])
         while len(blocks) >= 2:
             left, right = blocks[-2], blocks[-1]
@@ -125,7 +125,9 @@ class CalibrationRegistry:
             "y": y.tolist(),
             "fitted_on_run_id": fitted_on_run_id,
         }
-        calibration_id = "cal-" + hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()[:16]
+        calibration_id = (
+            "cal-" + hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()[:16]
+        )
         table = IsotonicTable(
             calibration_id=calibration_id,
             key=key,

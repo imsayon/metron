@@ -47,5 +47,7 @@ def select_available_frames(
     usable = [frame.validate() for frame in frames if frame.usable_at(issue_time)]
     usable.sort(key=lambda frame: frame.obs_time)
     if len(usable) < count:
-        raise DataAvailabilityError(f"need {count} frames available at issue time, found {len(usable)}")
+        raise DataAvailabilityError(
+            f"need {count} frames available at issue time, found {len(usable)}"
+        )
     return tuple(usable[-count:])

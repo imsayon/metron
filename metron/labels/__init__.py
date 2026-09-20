@@ -2,8 +2,8 @@
 
 from .catalogue import (
     LabelCatalogue,
-    LabelEvidence,
     LabelEvent,
+    LabelEvidence,
     LabelValidationError,
 )
 from .definitions import DEFINITION_VERSION, HAZARD_DEFINITIONS

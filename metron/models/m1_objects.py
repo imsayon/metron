@@ -25,7 +25,9 @@ class StormDetection:
     bbox: tuple[int, int, int, int]  # xmin, ymin, xmax, ymax
 
 
-def detect_objects(field: np.ndarray, *, threshold: float, min_area: int = 8) -> tuple[StormDetection, ...]:
+def detect_objects(
+    field: np.ndarray, *, threshold: float, min_area: int = 8
+) -> tuple[StormDetection, ...]:
     """Find 8-connected threshold exceedances on one grid frame."""
     if field.ndim != 2 or min_area < 1:
         raise ValueError("field must be 2-D and min_area must be positive")
@@ -120,7 +122,7 @@ def _greedy_assignment(cost: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
             pairs.append((int(row), int(col)))
     if not pairs:
         return np.array([], dtype=int), np.array([], dtype=int)
-    rows, cols = zip(*pairs)
+    rows, cols = zip(*pairs, strict=True)
     return np.asarray(rows), np.asarray(cols)
 
 
@@ -150,7 +152,9 @@ class StormTracker:
         self._next_id += 1
         return value
 
-    def _predicted_centroid(self, state: _TrackState, motion_uv: np.ndarray | None) -> tuple[float, float]:
+    def _predicted_centroid(
+        self, state: _TrackState, motion_uv: np.ndarray | None
+    ) -> tuple[float, float]:
         x, y = state.object.centroid
         if motion_uv is None:
             return x, y
@@ -179,14 +183,15 @@ class StormTracker:
                     distances[row, col] = distance * self.km_per_cell
                     cost[row, col] = (
                         distances[row, col] / self.gate_km
-                        + 0.5 * abs(np.log((detection.area_cells + 1) / (state.object.area_cells + 1)))
+                        + 0.5
+                        * abs(np.log((detection.area_cells + 1) / (state.object.area_cells + 1)))
                         + 0.3 * abs(detection.max_value - state.previous_max) / 10
                     )
             if linear_sum_assignment is not None:
                 rows, cols = linear_sum_assignment(cost)
             else:  # pragma: no cover - scipy is present in the test runtime
                 rows, cols = _greedy_assignment(cost)
-            for row, col in zip(rows, cols):
+            for row, col in zip(rows, cols, strict=True):
                 if distances[row, col] <= self.gate_km:
                     assigned[int(col)] = int(row)
 
@@ -216,7 +221,11 @@ class StormTracker:
                 state_name = "Candidate"
             elif detection.max_value >= 45:
                 state_name = "Mature"
-            elif matched_state is not None and detection.max_value <= previous_max - 5 and detection.area_cells < previous_area:
+            elif (
+                matched_state is not None
+                and detection.max_value <= previous_max - 5
+                and detection.area_cells < previous_area
+            ):
                 state_name = "Decaying"
             else:
                 state_name = "Developing"
@@ -329,7 +338,10 @@ def _arrival_for_member(
     for step in range(1, horizon_steps + 1):
         moving = advect(moving, motion_uv, 1)
         hit = moving > 0.5
-        if hit.any() and np.min((xx[hit] - target.x) ** 2 + (yy[hit] - target.y) ** 2) <= radius_cells**2:
+        if (
+            hit.any()
+            and np.min((xx[hit] - target.x) ** 2 + (yy[hit] - target.y) ** 2) <= radius_cells**2
+        ):
             return step * step_minutes
     return None
 
@@ -354,14 +366,16 @@ def compute_arrival_windows(
         arrivals = [
             value
             for member in motion_members
-            if (value := _arrival_for_member(
-                storm.footprint,
-                target,
-                member,
-                horizon_steps=horizon_steps,
-                step_minutes=step_minutes,
-                km_per_cell=km_per_cell,
-            ))
+            if (
+                value := _arrival_for_member(
+                    storm.footprint,
+                    target,
+                    member,
+                    horizon_steps=horizon_steps,
+                    step_minutes=step_minutes,
+                    km_per_cell=km_per_cell,
+                )
+            )
             is not None
         ]
         if arrivals:

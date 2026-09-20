@@ -2,7 +2,6 @@ import unittest
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
-
 from metron.models.baselines import advect, lagrangian_persistence
 from metron.models.data import AvailableFrame, DataAvailabilityError, select_available_frames
 from metron.models.m0 import M0Config, M0Input, run_m0
@@ -22,7 +21,9 @@ class BaselineTests(unittest.TestCase):
         now = datetime(2026, 5, 1, tzinfo=timezone.utc)
         frames = (
             AvailableFrame(np.ones((2, 2)), now, now),
-            AvailableFrame(np.ones((2, 2)) * 2, now + timedelta(minutes=10), now + timedelta(minutes=11)),
+            AvailableFrame(
+                np.ones((2, 2)) * 2, now + timedelta(minutes=10), now + timedelta(minutes=11)
+            ),
         )
         selected = select_available_frames(frames, issue_time=now, count=1)
         self.assertEqual(float(selected[0].values[0, 0]), 1)

@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 
 class SplitValidationError(ValueError):
     """Raised for a split that can leak adjacent frames."""
 
 
-VALID_SPLITS = frozenset({"chronological", "event_grouped", "geographic_holdout", "seasonal_holdout"})
+VALID_SPLITS = frozenset(
+    {"chronological", "event_grouped", "geographic_holdout", "seasonal_holdout"}
+)
 
 
 def validate_split(split: str) -> str:

@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
-
 from metron.models.baselines import advect
 from metron.models.calibration import CalibrationKey, CalibrationRegistry
 from metron.models.data import AvailableFrame
@@ -26,7 +25,9 @@ def run_smoke() -> dict[str, object]:
     field[8:12, 2:6] = 50
     frames = (
         AvailableFrame(field, start, start + timedelta(minutes=9), synthetic=True),
-        AvailableFrame(field, start + timedelta(minutes=10), start + timedelta(minutes=10), synthetic=True),
+        AvailableFrame(
+            field, start + timedelta(minutes=10), start + timedelta(minutes=10), synthetic=True
+        ),
     )
     motion = np.zeros((2, 24, 24), dtype=np.float32)
     motion[0] = 1
@@ -45,7 +46,9 @@ def run_smoke() -> dict[str, object]:
     tracker = StormTracker()
     first = tracker.update(detect_objects(field, threshold=35, min_area=8))
     second_field = advect(field, motion, 1)
-    second = tracker.update(detect_objects(second_field, threshold=35, min_area=8), motion_uv=motion)
+    second = tracker.update(
+        detect_objects(second_field, threshold=35, min_area=8), motion_uv=motion
+    )
     assert len(first) == len(second) == 1
     arrival = compute_arrival_windows(
         second[0],
@@ -63,9 +66,7 @@ def run_smoke() -> dict[str, object]:
         seed=0,
     )
     assert any(dropped.valid.values())
-    assert choose_rung(
-        ModalityStatus(True, 5, True, 5, 1.0, True, 2, 2, True)
-    ).rung == "R0"
+    assert choose_rung(ModalityStatus(True, 5, True, 5, 1.0, True, 2, 2, True)).rung == "R0"
 
     calibration = CalibrationRegistry().fit(
         CalibrationKey("ci", 30, "R0", "pre_monsoon"),

@@ -66,8 +66,9 @@ def _validate_input(value: M0Input) -> None:
         raise ValueError("motion_quality and coverage_fraction must be in [0, 1]")
 
 
-def run_m0(value: M0Input, config: M0Config = M0Config()) -> M0Result:
+def run_m0(value: M0Input, config: M0Config | None = None) -> M0Result:
     """Run M0 or its explicit persistence fallback at one issue time."""
+    config = M0Config() if config is None else config
     config.validate()
     _validate_input(value)
     try:
@@ -95,7 +96,11 @@ def run_m0(value: M0Input, config: M0Config = M0Config()) -> M0Result:
             motion_quality=value.motion_quality,
             backend="persistence_fallback",
             synthetic=any(frame.synthetic for frame in frames),
-            abstentions=(Abstention("M0", "poor_motion", "insufficient history, motion quality, or coverage"),),
+            abstentions=(
+                Abstention(
+                    "M0", "poor_motion", "insufficient history, motion quality, or coverage"
+                ),
+            ),
         )
 
     deterministic = np.stack(

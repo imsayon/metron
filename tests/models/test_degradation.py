@@ -1,7 +1,6 @@
 import unittest
 
 import numpy as np
-
 from metron.models.availability import DatasetAvailability, TrainingUnavailable
 from metron.models.calibration import CalibrationKey, CalibrationRegistry
 from metron.models.m2_ci_ltg import M2Input, apply_modality_dropout

@@ -46,8 +46,7 @@ def apply_modality_dropout(
     dropped = {
         name
         for name, array in value.modalities.items()
-        if value.valid.get(name, False)
-        and rng.random() < probabilities.get(name, 0.0)
+        if value.valid.get(name, False) and rng.random() < probabilities.get(name, 0.0)
     }
     usable = [name for name in value.modalities if value.valid.get(name, False)]
     if usable and len(dropped) == len(usable):
@@ -57,7 +56,10 @@ def apply_modality_dropout(
         name: np.zeros_like(array) if name in dropped else np.asarray(array).copy()
         for name, array in value.modalities.items()
     }
-    valid = {name: bool(value.valid.get(name, False) and name not in dropped) for name in value.modalities}
+    valid = {
+        name: bool(value.valid.get(name, False) and name not in dropped)
+        for name in value.modalities
+    }
     return M2MaskedInput(masked, valid, tuple(sorted(dropped)))
 
 

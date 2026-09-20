@@ -1,10 +1,10 @@
+import json
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import json
 
-from metron.labels import LabelCatalogue, LabelEvidence, LabelEvent, LabelValidationError
+from metron.labels import LabelCatalogue, LabelEvent, LabelEvidence, LabelValidationError
 from metron.labels.cli import main
 
 
@@ -17,9 +17,7 @@ def event(**overrides):
         "longitude": 88.36,
         "source": "curated-report",
         "grade": "B",
-        "evidence": (
-            LabelEvidence(source="IMD", locator="report-1"),
-        ),
+        "evidence": (LabelEvidence(source="IMD", locator="report-1"),),
         "location_error_km": 5,
         "time_error_min": 30,
     }
@@ -30,9 +28,13 @@ def event(**overrides):
 class LabelCatalogueTests(unittest.TestCase):
     def test_add_and_grade(self):
         catalogue = LabelCatalogue()
-        catalogue.add(event(
-            evidence=(LabelEvidence(source="radar", locator="case-1", instrument_confirmed=True),),
-        ))
+        catalogue.add(
+            event(
+                evidence=(
+                    LabelEvidence(source="radar", locator="case-1", instrument_confirmed=True),
+                ),
+            )
+        )
         graded = catalogue.grade("hail-001", "A", location_error_km=None, time_error_min=None)
         self.assertEqual(graded.grade, "A")
 

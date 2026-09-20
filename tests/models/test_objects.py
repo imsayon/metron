@@ -1,7 +1,6 @@
 import unittest
 
 import numpy as np
-
 from metron.models.baselines import advect
 from metron.models.m1_objects import (
     EmpiricalSurvival,
@@ -24,7 +23,9 @@ class ObjectTests(unittest.TestCase):
         motion[0] = 1
         tracker = StormTracker()
         first = tracker.update(detect_objects(field, threshold=35, min_area=8))
-        second = tracker.update(detect_objects(advect(field, motion), threshold=35, min_area=8), motion_uv=motion)
+        second = tracker.update(
+            detect_objects(advect(field, motion), threshold=35, min_area=8), motion_uv=motion
+        )
         self.assertEqual(len(first), 1)
         self.assertEqual(first[0].track_id, second[0].track_id)
         self.assertEqual(second[0].parent_track_ids, ())

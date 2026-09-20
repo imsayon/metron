@@ -99,9 +99,7 @@ class LabelEvent:
                 raise LabelValidationError("grade B requires time_error_min <= 60")
         expected_proxy = HAZARD_DEFINITIONS[self.hazard].proxy
         if self.proxy != expected_proxy:
-            raise LabelValidationError(
-                f"proxy flag for {self.hazard} must be {expected_proxy}"
-            )
+            raise LabelValidationError(f"proxy flag for {self.hazard} must be {expected_proxy}")
         return replace(self, obs_time=obs_time)
 
     @property
