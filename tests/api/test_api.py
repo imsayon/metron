@@ -1,4 +1,5 @@
 import asyncio
+import json
 from datetime import timedelta
 from urllib.parse import quote
 
@@ -164,3 +165,25 @@ def test_asgi_preserves_non_json_cap_and_metric_bodies() -> None:
     start, body = asyncio.run(call("/metrics"))
     assert start["headers"][0] == (b"content-type", b"text/plain; version=0.0.4")
     assert body == b"metron_products_issued_total 1\n"
+
+
+def test_asgi_rejects_oversized_request_bodies() -> None:
+    api = _api()
+    sent: list[dict] = []
+    messages = iter([{"type": "http.request", "body": b"x" * (1_048_576 + 1), "more_body": False}])
+
+    async def receive() -> dict:
+        return next(messages)
+
+    async def send(message: dict) -> None:
+        sent.append(message)
+
+    asyncio.run(
+        api(
+            {"type": "http", "method": "POST", "path": "/v1/replay", "headers": []},
+            receive,
+            send,
+        )
+    )
+    assert sent[0]["status"] == 413
+    assert json.loads(sent[1]["body"])["status"] == 413

@@ -27,6 +27,7 @@ from .cap import CAPComposer
 from .explain import ExplanationService
 
 ROLE_LEVEL = {"viewer": 1, "forecaster": 2, "admin": 3}
+MAX_REQUEST_BODY_BYTES = 1_048_576
 
 
 class Problem(Exception):
@@ -697,18 +698,32 @@ class APIServer:
 
     async def __call__(self, scope: Mapping[str, Any], receive: Any, send: Any) -> None:
         if scope["type"] == "http":
-            body = bytearray()
-            while True:
-                message = await receive()
-                body.extend(message.get("body", b""))
-                if not message.get("more_body", False):
-                    break
-            headers = {key.decode(): value.decode() for key, value in scope.get("headers", [])}
-            url = scope.get("path", "/")
-            query_string = scope.get("query_string", b"")
-            if query_string:
-                url += "?" + query_string.decode()
-            response = self.handle(scope["method"], url, headers, bytes(body))
+            try:
+                body = bytearray()
+                while True:
+                    message = await receive()
+                    chunk = message.get("body", b"")
+                    if len(body) + len(chunk) > MAX_REQUEST_BODY_BYTES:
+                        raise Problem(
+                            413,
+                            "Payload Too Large",
+                            f"request body exceeds {MAX_REQUEST_BODY_BYTES} bytes",
+                        )
+                    body.extend(chunk)
+                    if not message.get("more_body", False):
+                        break
+                headers = {key.decode(): value.decode() for key, value in scope.get("headers", [])}
+                url = scope.get("path", "/")
+                query_string = scope.get("query_string", b"")
+                if query_string:
+                    url += "?" + query_string.decode()
+                response = self.handle(scope["method"], url, headers, bytes(body))
+            except Problem as exc:
+                response = Response(
+                    exc.status,
+                    exc.body(),
+                    {"content-type": "application/problem+json"},
+                )
             content_type = response.headers.get("content-type", "")
             if isinstance(response.body, bytes):
                 body_bytes = response.body
